@@ -1,0 +1,15 @@
+{
+  "tailwindCSS.experimental.configFile": "./frontend/tailwind.config.js",
+  "tailwindCSS.emmetCompletions": true,
+  "tailwindCSS.includeLanguages": {
+    "javascript": "javascript",
+    "html": "html",
+    "typescript": "typescript",
+    "javascriptreact": "javascript",
+    "typescriptreact": "typescript",
+    "vue": "html"
+  },
+  "editor.quickSuggestions": {
+    "strings": true
+  }
+}
