@@ -8,7 +8,15 @@ export const useProductStore = create((set,get) => ({
     products: [],
     loading: false,
     error: null,
-
+    // addProduct: async (e) =>{
+    //     e.preventDefault();
+    //     set({loading:true, error:null});
+    //     try{
+    //         const formData = new FormData();
+    //         const response = await axios.post(`${BaseUrl}/product/addProdcut`,formData);
+    //         set({products: [...get().products, response.data]});
+    //     }
+    // }
     fetchProducts: async () => {
         set({loading: true, error: null});
         try {

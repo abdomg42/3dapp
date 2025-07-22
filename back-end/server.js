@@ -2,20 +2,23 @@ import express from "express";
 import dotenv from "dotenv";
 import helmet from 'helmet';
 import morgan from 'morgan';
-
+import cors from 'cors';
+import path from 'path';
 import router from "./routes/ProductRoutes.js";
 import db from "./config/db.js";
 import routerProduct from "./routes/ProductRoutes.js";
 import UserRouter from "./routes/UserRoutes.js";
 import CategoryRouter from "./routes/CategoryRoutes.js";
 
-
 const app = express();
 const port = 3000;
 app.use(express.urlencoded({ extended: true }));
-
+app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
+
+const localPath = path.join('C:/Users/DELL/Downloads/chair');
+app.use('/images', express.static(localPath));
 
 
 app.get('/', (req, res) => {
