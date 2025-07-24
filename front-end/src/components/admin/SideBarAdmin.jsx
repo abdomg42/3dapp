@@ -7,19 +7,23 @@ import LogoutIcon from '../../assets/icons/Logout.png';
 import UserIcon from '../../assets/icons/User.png';
 import HumbL from '../../assets/icons/HumbL.png';
 
-const SidebarAdmin = () => {
+const SidebarAdmin = ({ isOpen, onClose }) => {
   return (
-    <div className="flex flex-col justify-between h-screen w-64 bg-[#D9D9D9] py-6 px-6" style={{ fontFamily: "'Poppins', sans-serif" }}>
-      {/* Top: Logo and Hamburger */}
+  <div
+      className={`fixed top-0 left-0 z-50 h-screen w-64 bg-[#D9D9D9] py-6 px-6 flex flex-col justify-between transition-transform duration-300 ease-in-out ${
+        isOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}
+      style={{ fontFamily: "'Poppins', sans-serif" }}
+    >           {/* Top: Logo and Hamburger */}
       <div>
         <div className="flex items-center justify-between mb-12">
           <div className="flex flex-col items-center">
             <img src={BigLogo} alt="MK Studios Logo" className="w-32 h-32 object-contain mb-1" />
           </div>
           {/* Hamburger icon */}
-          <a href="#" className="focus:outline-none">
-            <img src={HumbL} alt="Menu" className="w-10 h-10 object-contain" />
-          </a>
+          <button onClick={onClose} className=" cursor-pointer focus:outline-none">
+            <img src={HumbL} alt="Close Sidebar" className="w-10 h-10 object-contain" />
+          </button>
         </div>
         {/* Navigation Links */}
         <nav className="flex flex-col gap-10 mt-10">

@@ -8,7 +8,7 @@ import facebook from '../assets/icons/facebook.png'
 
 const Footer = () => {
   return (
-    <footer className="w-full sticky bottom-0 left-0 bg-[#35363A] text-[#E6E6E6] pt-8 pb-4 px-4 z-50">
+    <footer className="w-full bg-[#35363A] text-[#E6E6E6] pt-4 pb-2 px-4 z-50 flex-shrink-0">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-start gap-8 md:gap-24">
      
         <div className="flex flex-col items-start md:w-1/3">

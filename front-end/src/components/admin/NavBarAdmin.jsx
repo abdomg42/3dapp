@@ -8,11 +8,11 @@ import SearchIcon from "../../assets/icons/SearchIcon.png"
 import User from "../../assets/icons/User.png"
 import Upload from "../../assets/icons/Upload.png"
 
-const NavBarAdmin = () => {
+const NavBarAdmin = ({ onOpenSidebar }) => {
   return (
-    <nav className="bg-white shadow px-4 py-4 flex items-center justify-between">
+    <nav className="bg-white shadow px-4 py-2 flex items-center justify-between">
       <div className="flex items-center space-x-6 ml-2 sm:ml-4 md:ml-8">
-        <button className="cursor-pointer hover:opacity-75 transition">
+        <button className="cursor-pointer hover:opacity-75 transition" onClick={onOpenSidebar}>
         <img src={Humb} alt="Menu" className="w-7 h-7 " />
         </button>
         <button className="cursor-pointer hover:opacity-75 transition">
