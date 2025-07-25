@@ -1,6 +1,7 @@
 import React from 'react';
 import HeartIcon from '../assets/icons/Heart.png';
 
+
 const ProductCard = ({ product }) => {
   return (
     <div className="rounded-2xl border border-[#E0E0E0] shadow-md bg-white px-4 py-4 w-full flex flex-col h-full font-[Poppins] relative" style={{ fontFamily: "'Poppins', sans-serif" }}>

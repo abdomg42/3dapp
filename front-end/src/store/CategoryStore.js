@@ -8,15 +8,28 @@ export const useCategoryStore = create((set,get) => ({
     categories: [],
     loadingC: false,
     errorC: null,
-    // addProduct: async (e) =>{
-    //     e.preventDefault();
-    //     set({loading:true, error:null});
-    //     try{
-    //         const formData = new FormData();
-    //         const response = await axios.post(`${BaseUrl}/product/addProdcut`,formData);
-    //         set({products: [...get().products, response.data]});
-    //     }
-    // }
+   
+    formData: {
+      name:'',
+    },
+    setFormData: (formData) => set({formData}),
+    resetForm : () => set({formData: {name:''}}),
+
+
+    addCategory: async (e) =>{
+        e.preventDefault();
+        set({loading:true, error:null});
+        try{
+            const {formData} = get();
+            await axios.post(`${BaseUrl}/Category/createCategory`,formData);
+            await get().fetchCategories();
+            get().resetForm();
+            toast.success("Category added successfully");
+        }catch(error){
+          console.log(error);
+          toast.error("Something went wrong");
+        }
+    },
     fetchCategories: async () => {
         set({loading: true, error: null});
         try {

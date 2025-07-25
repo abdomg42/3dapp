@@ -12,12 +12,13 @@ import CategoryRouter from "./routes/CategoryRoutes.js";
 
 const app = express();
 const port = 3000;
+
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(helmet());
 app.use(morgan("dev"));
 
-const localPath = path.join('C:/Users/DELL/Downloads/chair');
+const localPath = path.join('C:/Users/USER/Downloads/chair');
 app.use('/images', express.static(localPath));
 
 
@@ -39,5 +40,5 @@ app.use("/user",UserRouter);
 app.use("/Category",CategoryRouter);
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
+  console.log(` app is listening on port ${port}`)
 })

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from "react-router-dom";
 import { useState } from 'react';
+import { Toaster } from "react-hot-toast";
 
 import NavBar from './components/User/NavBar';
 import NavBarAdmin from './components/admin/NavBarAdmin';
@@ -8,7 +9,7 @@ import SideBar from './components/User/SideBar';
 import SideBarAdmin from './components/admin/SideBarAdmin';
 import ProductCard from './components/ProductCard';
 import Footer from './components/Footer';
-import UploadPage from './components/admin/UploadPage';
+import UploadPage from './Pages/admin/UploadPage';
 
 import Home from './Pages/Home';
 import ProductPage from './Pages/ProductPage';
@@ -38,7 +39,7 @@ const App = () => {
         <Route path="/admin/SideBarAdmin" element={<SideBarAdmin />} />
       </Routes>
       <Footer />
-   
+      <Toaster/>
   </div>
   )
 }

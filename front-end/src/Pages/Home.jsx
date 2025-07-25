@@ -44,7 +44,7 @@ const Home = () => {
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
-          <button className="flex btn btn-ghost btn-circle bg-[#7A6B3F] text-white" onClick={fetchProducts}>
+          <button className="flex btn btn-ghost btn-circle bg-[#7A6B3F] text-white" onClick={fetchProducts && fetchCategories}>
             <RefreshCwIcon className="size-5" />
           </button>
         </div>

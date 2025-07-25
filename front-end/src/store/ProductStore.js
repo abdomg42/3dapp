@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import axios from "axios";
+import toast from "react-hot-toast";
+
 
 const BaseUrl = "http://localhost:3000";
 
@@ -9,38 +11,67 @@ export const useProductStore = create((set,get) => ({
     loading: false,
     error: null,
     currentProduct: null,
+
+    formData: {
+      name:'',
+      description:'',
+      fichier_path:'',
+      category:'',
+      format:'',
+      image:'',
+      logiciel:'',
+    },
+    setFormData: (formData) => set({formData}),
+    resetForm : () => set({formData: {name:'',
+                                      description:'',
+                                      fichier_path:'',
+                                      category:'',
+                                      format:'',
+                                      image:'',
+                                      logiciel:''}}),
+
+
     addProduct: async (e) =>{
         e.preventDefault();
         set({loading:true, error:null});
         try{
-            const formData = new FormData();
-            const response = await axios.post(`${BaseUrl}/product/addProdcut`,formData);
-            set({products: [...get().products, response.data]});
+            const {formData} = get();
+            await axios.post(`${BaseUrl}/product/createProduct`,formData);
+            await get().fetchProducts();
+            get().resetForm();
+            toast.success("Product added successfully");
+        }catch(error){
+          console.log(error);
+          toast.error("Something went wrong");
         }
-    }
+    },
     fetchProducts: async () => {
         set({loading: true, error: null});
         try {
             const response = await axios.get(`${BaseUrl}/product/getproducts `);
             set({products: response.data, loading: false});
         } catch (error) {
-            set({error: error.message, loading: false});
+            console.log("Error in fetch Product function", error);
+            toast.error("Something went wrong");
+        }finally {
+          set({ loading: false });
         }
     },
     fetchProduct: async (id) => {
-        set({ loading1: true , error1: null});
+        set({ loading: true , error: null});
         try {
           const response = await axios.get(`${BaseUrl}/product/getproduct/${id}`);
           set({
-            currentProduct: response.data,
-            loading1: false, // pre-fill form with current product data
-            error1: null,
+            product: response.data,
+            loading: false, // pre-fill form with current product data
+            error: null,
           });
         } catch (error) {
           console.log("Error in fetchProduct function", error);
-          set({ error: "Something went wrong", currentProduct: null });
+          set({ error: "Something went wrong", product: null });
+          toast.error("Something went wrong");
         } finally {
-          set({ loading1: false });
+          set({ loading: false });
         }
       }
 }))

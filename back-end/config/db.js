@@ -5,8 +5,8 @@ const connection = {
   host: 'localhost',
   port: 5432,
   database: 'mkstudio',
-  user: 'admin',
-  password: 'admin',
+  user: 'postgres',
+  password: '1598',
 };
 const db = pgp(connection);
 
