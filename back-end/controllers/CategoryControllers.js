@@ -31,6 +31,11 @@ export const getCategory = async (req, res) =>{
 export const createCategory = async (req, res) =>{
     const { name } = req.body;
     try {
+        // Check for duplicate category name
+        const existingCategory = await db.oneOrNone('SELECT * FROM categories WHERE name = $1', [name]);
+        if (existingCategory) {
+            return res.status(409).json({ error: 'A category with this name already exists.' });
+        }
         const inserted = db.oneOrNone(`
         INSERT into categories(name) 
         values ($1)  

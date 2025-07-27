@@ -1,7 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import SignUpImage from '../../assets/auth/SignUp.png';
+import { useUserStore } from '../../store/UserStore';
+import { Link, useNavigate } from 'react-router-dom';
 
 const SignUp = () => {
+  const signup = useUserStore((state) => state.signup);
+  const loading = useUserStore((state) => state.loading);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const result = await signup({ name, email, password, confirmPassword });
+    if (result?.success) {
+      navigate("/signup-success");
+    }
+  };
+
   return (
     <div className="flex h-screen bg-white" style={{ fontFamily: "'Poppins', sans-serif" }}>
       {/* Left side with background image */}
@@ -13,7 +31,7 @@ const SignUp = () => {
       <div className="w-1/2 flex flex-col justify-center items-center px-16">
         <h1 className="text-5xl font-bold mb-8 self-center text-center w-full text-black">Sign up</h1>
 
-        <form className="w-full">
+        <form className="w-full" onSubmit={handleSubmit}>
           {/* Username */}
           <div className="mb-6">
             <label className="block text-gray-700 text-sm font-medium mb-3" htmlFor="username">
@@ -23,6 +41,9 @@ const SignUp = () => {
               className="w-full h-12 px-4 bg-white text-black rounded-md focus:outline-none ring-2 ring-gray-500"
               id="username"
               type="text"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              required
             />
           </div>
 
@@ -35,6 +56,9 @@ const SignUp = () => {
               className="w-full h-12 px-4 bg-white text-black rounded-md focus:outline-none ring-2 ring-gray-500"
               id="email"
               type="email"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -47,6 +71,9 @@ const SignUp = () => {
               className="w-full h-12 px-4 bg-white text-black rounded-md focus:outline-none ring-2 ring-gray-500"
               id="password"
               type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              required
             />
           </div>
 
@@ -59,6 +86,9 @@ const SignUp = () => {
               className="w-full h-12 px-4 bg-white text-black rounded-md focus:outline-none ring-2 ring-gray-500"
               id="password-again"
               type="password"
+              value={confirmPassword}
+              onChange={e => setConfirmPassword(e.target.value)}
+              required
             />
           </div>
 
@@ -68,24 +98,26 @@ const SignUp = () => {
               type="checkbox"
               id="terms"
               className="w-5 h-5 accent-black"
+              required
             />
             <label htmlFor="terms" className="ml-2 text-gray-600">
               By clicking you agree to the <a href="#" className="underline">termes</a> and <a href="#" className="underline">conditions</a>
             </label>
           </div>
 
-          {/* Log in button */}
+          {/* Sign up button */}
           <button
             className="w-full h-12 bg-black text-white font-bold rounded-full hover:bg-gray-800 transition duration-300"
-            type="button"
+            type="submit"
+            disabled={loading}
           >
-            Log in
+            {loading ? 'Signing up...' : 'Sign up'}
           </button>
         </form>
 
-        {/* Sign up link */}
+        {/* Log in link */}
         <p className="mt-8 text-gray-600">
-          You already have an ccount? <a href="#" className="underline font-bold">Sign up</a>
+          You already have an account? <Link to="/login" className="underline font-bold">Log in</Link>
         </p>
       </div>
     </div>

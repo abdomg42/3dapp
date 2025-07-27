@@ -92,7 +92,7 @@ const UploadPage = () => {
         </div>
       </div> */}
       <div className="flex gap-4 mt-4">
-        <button type="button" onClick={handleCancel} className="flex items-center gap-2 bg-[#444] text-white px-6 py-2 rounded font-bold cursor-pointer">
+        <button type="reset" onClick={handleCancel} className="flex items-center gap-2 bg-[#444] text-white px-6 py-2 rounded font-bold cursor-pointer">
           <span role="img" aria-label="cancel">🗑️</span> Cancel
         </button>
         <button type="submit" className="flex items-center gap-2 bg-[#2563eb] text-white px-6 py-2 rounded font-bold cursor-pointer">

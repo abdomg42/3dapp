@@ -32,16 +32,19 @@ export const useProductStore = create((set,get) => ({
 
 
     addProduct: async (e) =>{
+        console.log("addProduct called"); // Debug log
         e.preventDefault();
         set({loading:true, error:null});
         try{
             const {formData} = get();
-            await axios.post(`${BaseUrl}/product/createProduct`,formData);
+            console.log("Submitting formData:", formData); // Debug log
+            const response = await axios.post(`${BaseUrl}/product/createProduct`,formData);
+            console.log("API response:", response); // Debug log
             await get().fetchProducts();
             get().resetForm();
             toast.success("Product added successfully");
         }catch(error){
-          console.log(error);
+          console.log("addProduct error:", error); // Debug log
           toast.error("Something went wrong");
         }
     },

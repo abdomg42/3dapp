@@ -40,6 +40,11 @@ export const createProduct = async (req, res) =>{
   }
 
   try {
+    // Check for duplicate product name
+    const existingProduct = await db.oneOrNone('SELECT * FROM products WHERE name = $1', [name]);
+    if (existingProduct) {
+      return res.status(409).json({ error: 'A product with this name already exists.' });
+    }
     let id_category;
     if(category){
     const result = await db.one(`

@@ -6,8 +6,14 @@ import Cam from "../../assets/icons/Cam.png"
 import Heart from "../../assets/icons/Heart.png"
 import SearchIcon from "../../assets/icons/SearchIcon.png"
 import User from "../../assets/icons/User.png"
+import { useUserStore } from '../../store/UserStore';
+import Upload from "../../assets/icons/Upload.png"
 
 const NavBar = ({ onOpenSidebar }) => {
+  
+  const {user} = useUserStore();
+  const isAdmin = user.role === "admin";
+
   return (
     <nav className="bg-white shadow px-4 py-2 flex items-center justify-between">
       <div className="flex items-center space-x-6 ml-2 sm:ml-4 md:ml-8">
@@ -34,6 +40,11 @@ const NavBar = ({ onOpenSidebar }) => {
       </div>
 
       <div className="flex items-center space-x-6 sm:space-x-4 lg:space-x-12 mr-2  md:mr-6">
+      {isAdmin && (
+          <button className="cursor-pointer hover:opacity-75 transition">
+            <img src={Upload} alt="Upload" className="w-10 h-10 hidden lg:block " />
+          </button>
+        )}
         <button className="cursor-pointer hover:opacity-75 transition">
           <img src={Heart} alt="Favorites" className="w-10 h-10 hidden lg:block " />
         </button>
