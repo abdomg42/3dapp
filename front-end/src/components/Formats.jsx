@@ -58,7 +58,7 @@ const Formats = () => {
   }, [fetchFormats]);
 
   return (
-    <aside className="w-56 min-w-[180px] max-w-xs shadow p-4 h-fit sticky top-8 self-start bg-white rounded-xl">
+    <div className="w-full">
       <h2 className="text-2xl font-bold text-[#7A6B3F] mb-4">Formats</h2>
       <ExpandableButtonList
         items={formats}
@@ -66,7 +66,7 @@ const Formats = () => {
         setSelected={setSelectedFormat}
         label="Format"
       />
-    </aside>
+    </div>
   );
 };
 

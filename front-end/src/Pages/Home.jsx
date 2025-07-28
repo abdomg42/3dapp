@@ -42,8 +42,8 @@ const Home = () => {
     <div className="min-h-screen flex flex-row">
       {/* Sidebar */}
       {categories && categories.length > 0 && (
-        <aside className="lg:w-64 flex-shrink-0 lg:h-screen pt-4 rounded-xl shadow sticky top-0 overflow-y-auto z-30">
-          <div className="space-y-4">
+        <aside className="lg:w-64 flex-shrink-0 lg:h-screen pt-4 rounded-xl shadow sticky top-0 overflow-y-auto z-30 bg-white p-4 my-2">
+          <div className="space-y-6">
             <Category />
             <Formats />
             <Logiciels />

@@ -58,7 +58,7 @@ const Category = () => {
   }, [fetchCategories]);
 
   return (
-    <aside className="w-56 min-w-[180px] max-w-xs shadow p-4 h-fit sticky top-8 self-start bg-white rounded-xl">
+    <div className="w-full">
       <h2 className="text-2xl font-bold text-[#7A6B3F] mb-4">Categories</h2>
       {loadingC ? (
         <div className="text-gray-500">Loading...</div>
@@ -72,7 +72,7 @@ const Category = () => {
           label="Category"
         />
       )}
-    </aside>
+    </div>
   );
 };
 

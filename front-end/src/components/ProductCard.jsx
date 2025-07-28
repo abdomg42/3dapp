@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import HeartIcon from '../assets/icons/Heart.png';
+import FavClickedIcon from '../assets/icons/Favclicked.png';
 import { useFavoritesStore } from '../store/FavoritesStore';
 import { useUserStore } from '../store/UserStore';
 import { toast } from 'react-hot-toast';
@@ -24,7 +25,15 @@ const ProductCard = ({ product }) => {
       return;
     }
 
-    await toggleFavorite(product.product_id);
+    // Update UI immediately
+    setIsFavorite(!isFavorite);
+    
+    try {
+      await toggleFavorite(product.product_id);
+    } catch (error) {
+      // Revert UI if API call fails
+      setIsFavorite(!isFavorite);
+    }
   };
 
   return (
@@ -35,9 +44,9 @@ const ProductCard = ({ product }) => {
         onClick={handleFavoriteClick}
       >
         <img 
-          src={HeartIcon} 
+          src={isFavorite ? FavClickedIcon : HeartIcon} 
           alt="Favorite" 
-          className={`w-7 h-7 transition-all duration-200 ${
+          className={`w-7 h-7 transition-all duration-200 cursor-pointer ${
             isFavorite ? 'opacity-100 scale-110' : 'opacity-50 hover:opacity-75'
           }`} 
         />
@@ -57,13 +66,13 @@ const ProductCard = ({ product }) => {
       <div className="flex flex-col md:flex-row gap-2 mt-auto w-full">
         <a
           href="#"
-          className="flex-1 min-w-[90px] whitespace-nowrap bg-[#A6E6B5] border border-[#333] text-[#333] font-medium rounded-xl px-2 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#8fdca3] transition cursor-pointer text-center"
+          className="flex-1 min-w-[90px] whitespace-nowrap bg-[#A6E6B5] border border-[#333] text-[#333] font-medium rounded-xl px-3 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#8fdca3] transition cursor-pointer text-center flex items-center justify-center"
         >
           Download
         </a>
         <a
           href="#"
-          className="flex-1 min-w-[90px] whitespace-nowrap bg-white border border-[#333] text-[#333] font-medium rounded-xl px-3 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#f3f3f3] transition cursor-pointer text-center"
+          className="flex-1 min-w-[90px] whitespace-nowrap bg-white border border-[#333] text-[#333] font-medium rounded-xl px-3 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#f3f3f3] transition cursor-pointer text-center flex items-center justify-center"
         >
           details
         </a>

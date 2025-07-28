@@ -30,6 +30,7 @@ export const useFavoritesStore = create((set, get) => ({
     } catch (error) {
       console.log("Error adding to favorites:", error);
       toast.error(error.response?.data?.error || "Failed to add to favorites");
+      throw error;
     }
   },
 
@@ -43,6 +44,7 @@ export const useFavoritesStore = create((set, get) => ({
     } catch (error) {
       console.log("Error removing from favorites:", error);
       toast.error(error.response?.data?.error || "Failed to remove from favorites");
+      throw error;
     }
   },
 
