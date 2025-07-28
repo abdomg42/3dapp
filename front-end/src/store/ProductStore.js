@@ -13,6 +13,8 @@ export const useProductStore = create((set,get) => ({
     currentProduct: null,
     formats: [],
     logiciels: [],
+    searchResults: [],
+    searchLoading: false,
 
     formData: {
       name:'',
@@ -33,21 +35,24 @@ export const useProductStore = create((set,get) => ({
                                       logiciel:''}}),
 
 
-    addProduct: async (e) =>{
+    addProduct: async (formData) => {
         console.log("addProduct called"); // Debug log
-        e.preventDefault();
         set({loading:true, error:null});
         try{
-            const {formData} = get();
             console.log("Submitting formData:", formData); // Debug log
-            const response = await axios.post(`${BaseUrl}/product/createProduct`,formData);
+            const response = await axios.post(`${BaseUrl}/product/createProduct`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
             console.log("API response:", response); // Debug log
             await get().fetchProducts();
-            get().resetForm();
             toast.success("Product added successfully");
         }catch(error){
           console.log("addProduct error:", error); // Debug log
           toast.error("Something went wrong");
+        } finally {
+            set({ loading: false });
         }
     },
     fetchProducts: async () => {
@@ -78,6 +83,24 @@ export const useProductStore = create((set,get) => ({
         } finally {
           set({ loading: false });
         }
+      },
+    searchProducts: async (query) => {
+        if (!query || query.trim() === '') {
+          set({ searchResults: [], searchLoading: false });
+          return;
+        }
+        
+        set({ searchLoading: true });
+        try {
+          const response = await axios.get(`${BaseUrl}/product/search?q=${encodeURIComponent(query.trim())}`);
+          set({ searchResults: response.data, searchLoading: false });
+        } catch (error) {
+          console.log("Error searching products:", error);
+          set({ searchResults: [], searchLoading: false });
+        }
+      },
+    clearSearchResults: () => {
+        set({ searchResults: [], searchLoading: false });
       },
     fetchFormats: async () => {
       try {

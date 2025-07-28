@@ -1,105 +1,281 @@
 import React, { useState } from 'react';
 import { useProductStore } from '../../store/ProductStore';
+import { toast } from 'react-hot-toast';
 
 const categories = ['Cat1', 'Category 2', 'Category 3'];
 const formats = ['format 1', 'format 2', '.xml'];
 const logiciels = ['Logiciel 1', 'Logiciel 2', 'Logiciel 3'];
 
 const UploadPage = () => {
-
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
-  const [format, setFormat] = useState('');
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    category: '',
+    format: '',
+    logiciel: ''
+  });
+  const [imageFile, setImageFile] = useState(null);
   const [modelFile, setModelFile] = useState(null);
-  const [logiciel, setLogiciel] = useState('');
-  const [previewFile, setPreviewFile] = useState(null);
-  const [length, setLength] = useState('');
-  const [width, setWidth] = useState('');
-  const [height, setHeight] = useState('');
-  const [description, setDescription] = useState('');
-  const [tagInput, setTagInput] = useState('');
-  const [tags, setTags] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const {addProduct, formData, setFormData } = useProductStore();
+  const { addProduct } = useProductStore();
 
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate image file
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please select a valid image file (JPEG, PNG, GIF, WebP)');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast.error('Image file size must be less than 5MB');
+        return;
+      }
+      setImageFile(file);
+    }
+  };
+
+  const handleModelFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Validate 3D model file
+      const allowedExtensions = ['.3ds', '.obj', '.fbx', '.dae', '.blend', '.max', '.ma', '.mb', '.stl', '.ply', '.wrl', '.vrml', '.3dm', '.skp', '.dwg', '.dxf', '.iges', '.step', '.stp'];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      
+      if (!allowedExtensions.includes(fileExtension)) {
+        toast.error('Please select a valid 3D model file');
+        return;
+      }
+      if (file.size > 100 * 1024 * 1024) { // 100MB limit
+        toast.error('Model file size must be less than 100MB');
+        return;
+      }
+      setModelFile(file);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.category || !formData.format || !formData.logiciel) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    if (!imageFile) {
+      toast.error('Please select an image file');
+      return;
+    }
+
+    if (!modelFile) {
+      toast.error('Please select a model file');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const submitFormData = new FormData();
+      
+      // Add text fields
+      submitFormData.append('name', formData.name);
+      submitFormData.append('description', formData.description);
+      submitFormData.append('category', formData.category);
+      submitFormData.append('format', formData.format);
+      submitFormData.append('logiciel', formData.logiciel);
+      
+      // Add files
+      submitFormData.append('image', imageFile);
+      submitFormData.append('file', modelFile);
+
+      await addProduct(submitFormData);
+      
+      // Reset form
+      setFormData({
+        name: '',
+        description: '',
+        category: '',
+        format: '',
+        logiciel: ''
+      });
+      setImageFile(null);
+      setModelFile(null);
+      
+      toast.success('Product uploaded successfully!');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error('Failed to upload product');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCancel = () => {
-    setTitle(''); setCategory(''); setFormat(''); setModelFile(null); setLogiciel(''); setPreviewFile(null);
-    setLength(''); setWidth(''); setHeight(''); setDescription(''); setTagInput(''); setTags([]);
-  };
-  const handleUpload = (e) => {
-    e.preventDefault();
-    // handle upload logic here
-    alert('Upload submitted!');
+    setFormData({
+      name: '',
+      description: '',
+      category: '',
+      format: '',
+      logiciel: ''
+    });
+    setImageFile(null);
+    setModelFile(null);
   };
 
   return (
-    <form className="max-w-xl mx-auto mt-8 pb-10 space-y-4 font-[Poppins]" style={{ fontFamily: "'Poppins', sans-serif" }} onSubmit={addProduct}>
-      <div>
-        <label className="block mb-1 text-[#333]">Title</label>
-        <input value={formData.name} onChange={e => setFormData({...formData , name : e.target.value})} className="w-full border rounded px-2 py-1 bg-[#fff] text-black" />
-      </div>
-      <div className="flex gap-2">
-        <select value={formData.category} onChange={e => setFormData({...formData , category : e.target.value})} className="border rounded px-2 py-1 bg-[#fff] text-black">
-          <option value="">Category</option>
-          {categories.map(c => <option key={c}>{c}</option>)}
-        </select>
-        <select value={formData.format} onChange={e => setFormData({...formData , format : e.target.value})} className="border rounded px-2 py-1 bg-[#fff] text-black">
-          <option value="">format</option>
-          {formats.map(f => <option key={f}>{f}</option>)}
-        </select>
-      </div>
-      <div>
-        <label className="block mb-1 text-[#333]">Model path </label>
-        <div className="flex">
-          <input type="text"  value={formData.fichier_path} className="flex-1 border rounded-l px-2 py-1 bg-[#fff] text-black" onChange={e => setFormData({...formData , fichier_path : e.target.value})} />
-          <label className="bg-[#444] text-white px-6 py-1 rounded-r cursor-pointer font-bold" style={{display:'flex',alignItems:'center'}}>
-            Upload
-            <input type="file" className="hidden"  />
-          </label>
+    <div className="max-w-2xl mx-auto mt-8 pb-10 font-[Poppins]" style={{ fontFamily: "'Poppins', sans-serif" }}>
+      <h1 className="text-3xl font-bold text-[#333] mb-8 text-center">Upload New Product</h1>
+      
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Product Name */}
+        <div>
+          <label className="block mb-2 text-[#333] font-medium">Product Name *</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter product name"
+            required
+          />
         </div>
-      </div>
-      <div>
-        <select value={formData.logiciel} onChange={e =>  setFormData({...formData , logiciel : e.target.value})} className="border rounded px-2 py-1 bg-[#fff] text-black">
-          <option value="">Logiciel</option>
-          {logiciels.map(l => <option key={l}>{l}</option>)}
-        </select>
-      </div>
-      <div>
-        <label className="block mb-1 text-[#333]">Image </label>
-        <div className="flex">
-           <input type="text"  value={formData.image} className="flex-1 border rounded-l px-2 py-1 bg-[#fff] text-black" onChange={e => setFormData({...formData , image : e.target.value})} />
-          <label className="bg-[#444] text-white px-6 py-1 rounded-r cursor-pointer font-bold" style={{display:'flex',alignItems:'center'}}>
-            Upload
-            <input type="file" className="hidden"  />
-          </label>
+
+        {/* Category and Format */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block mb-2 text-[#333] font-medium">Category *</label>
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select Category</option>
+              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+          </div>
+          
+          <div>
+            <label className="block mb-2 text-[#333] font-medium">Format *</label>
+            <select
+              name="format"
+              value={formData.format}
+              onChange={handleInputChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            >
+              <option value="">Select Format</option>
+              {formats.map(fmt => <option key={fmt} value={fmt}>{fmt}</option>)}
+            </select>
+          </div>
         </div>
-      </div>
-      <div>
-        <label className="block mb-1 text-[#333]">Description</label>
-        <textarea value={formData.description} onChange={e => setFormData({...formData , description : e.target.value})} className="w-full border rounded px-2 py-1 bg-[#fff] text-black min-h-[100px]" />
-      </div>
-      {/* <div>
-        <label className="block mb-1 text-[#333]">Tags</label>
-        <div className="flex">
-          <input value={tagInput} onChange={e => setTagInput(e.target.value)} className="flex-1 border rounded-l px-2 py-1 bg-[#fff] text-black" />
-          <button onClick={handleAddTag} className="bg-[#444] text-white px-6 py-1 rounded-r font-bold">Add</button>
+
+        {/* Software */}
+        <div>
+          <label className="block mb-2 text-[#333] font-medium">Software *</label>
+          <select
+            name="logiciel"
+            value={formData.logiciel}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+            required
+          >
+            <option value="">Select Software</option>
+            {logiciels.map(log => <option key={log} value={log}>{log}</option>)}
+          </select>
         </div>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {tags.map(tag => (
-            <span key={tag} className="bg-[#E0E0E0] px-3 py-1 rounded-full text-sm">{tag}</span>
-          ))}
+
+        {/* Model File Upload */}
+        <div>
+          <label className="block mb-2 text-[#333] font-medium">3D Model File *</label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+            <input
+              type="file"
+              onChange={handleModelFileChange}
+              accept=".3ds,.obj,.fbx,.dae,.blend,.max,.ma,.mb,.stl,.ply,.wrl,.vrml,.3dm,.skp,.dwg,.dxf,.iges,.step,.stp"
+              className="hidden"
+              id="model-file"
+            />
+            <label htmlFor="model-file" className="cursor-pointer">
+              <div className="text-4xl mb-2">📁</div>
+              <p className="text-gray-600">
+                {modelFile ? modelFile.name : 'Click to select 3D model file'}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Supported formats: 3DS, OBJ, FBX, DAE, BLEND, MAX, MA, MB, STL, PLY, WRL, VRML, 3DM, SKP, DWG, DXF, IGES, STEP, STP
+              </p>
+              <p className="text-sm text-gray-500">Max size: 100MB</p>
+            </label>
+          </div>
         </div>
-      </div> */}
-      <div className="flex gap-4 mt-4">
-        <button type="reset" onClick={handleCancel} className="flex items-center gap-2 bg-[#444] text-white px-6 py-2 rounded font-bold cursor-pointer">
-          <span role="img" aria-label="cancel">🗑️</span> Cancel
-        </button>
-        <button type="submit" className="flex items-center gap-2 bg-[#2563eb] text-white px-6 py-2 rounded font-bold cursor-pointer">
-          <span role="img" aria-label="upload">📤</span> Upload
-        </button>
-      </div>
-    </form>
+
+        {/* Image Upload */}
+        <div>
+          <label className="block mb-2 text-[#333] font-medium">Product Image *</label>
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+            <input
+              type="file"
+              onChange={handleImageChange}
+              accept="image/*"
+              className="hidden"
+              id="image-file"
+            />
+            <label htmlFor="image-file" className="cursor-pointer">
+              <div className="text-4xl mb-2">🖼️</div>
+              <p className="text-gray-600">
+                {imageFile ? imageFile.name : 'Click to select product image'}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                Supported formats: JPEG, PNG, GIF, WebP
+              </p>
+              <p className="text-sm text-gray-500">Max size: 5MB</p>
+            </label>
+          </div>
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block mb-2 text-[#333] font-medium">Description</label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleInputChange}
+            className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black min-h-[120px] focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter product description..."
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-4 pt-4">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-600 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? 'Uploading...' : 'Upload Product'}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

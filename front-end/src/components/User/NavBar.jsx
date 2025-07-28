@@ -3,12 +3,11 @@ import { Link } from 'react-router-dom'
 import Humb from "../../assets/icons/Humb.png"
 import logo from "../../assets/Logos/logo.png"
 import Drop from "../../assets/icons/Drop.png"
-import Cam from "../../assets/icons/Cam.png"
 import Heart from "../../assets/icons/Heart.png"
-import SearchIcon from "../../assets/icons/SearchIcon.png"
 import User from "../../assets/icons/User.png"
 import { useUserStore } from '../../store/UserStore';
 import Upload from "../../assets/icons/Upload.png"
+import SearchBar from '../SearchBar';
 
 const NavBar = ({ onOpenSidebar }) => {
   
@@ -26,19 +25,7 @@ const NavBar = ({ onOpenSidebar }) => {
         </Link>
       </div>
 
-      <div className="flex-1 mx-2 max-w-xl  lg:flex ">
-        <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 w-full">
-          <img src={SearchIcon} alt="Search" className="w-6 h-6 mx-4 hidden sm:block" />
-          <input
-            type="text"
-            placeholder="Search models"
-            className="flex-1 h-12 w-auto bg-transparent focus:outline-none text-base text-gray-700"
-          />
-          <button className="cursor-pointer hover:opacity-75 transition">
-            <img src={Cam} alt="Camera" className="w-6 h-6 mx-4 " />
-          </button>
-        </div>
-      </div>
+      <SearchBar />
 
       <div className="flex items-center space-x-6 sm:space-x-4 lg:space-x-12 mr-2  md:mr-6">
       {isAdmin && (

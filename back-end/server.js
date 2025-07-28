@@ -17,31 +17,25 @@ import FavoritesRouter from "./routes/FavoritesRoutes.js";
 const app = express();
 const port = 3000;
 
-app.use(express.urlencoded({ extended: true }));
-app.use(cors({
-  origin: "http://localhost:5173", // Your frontend's origin
-  credentials: true               // Allow cookies and credentials
-}));
-app.use(cookieParser());
+dotenv.config();
+
 app.use(helmet());
-app.use(morgan("dev"));
+app.use(morgan('combined'));
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}));
 
-
-const localPath = path.join('C:/Users/DELL/Downloads/chair');
-app.use('/images', express.static(localPath));
-
-
-
-app.get('/db-test', async (req, res) => {
-  try {
-    const result = await db.one('SELECT NOW() as time');
-    res.send(`Database connected! Server time: ${result.time}`);
-  } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(500).send('Database connection failed');
-  }
-});
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Serve static files from upload directory
+app.use('/upload', express.static(path.join(process.cwd(), 'upload')));
+
+// Serve images directory
+app.use('/images', express.static(path.join(process.cwd(), 'images')));
+
 app.use("/Product",routerProduct);
 app.use("/user",UserRouter);
 app.use("/Category",CategoryRouter);
@@ -49,7 +43,6 @@ app.use("/Format",FormatRouter);
 app.use("/Logiciel",LogicielRouter);
 app.use("/favorite", FavoritesRouter);
 
-
 app.listen(port, () => {
-  console.log(`The App is listening on port ${port}`)
-})
+  console.log(`Server is running on port ${port}`);
+});

@@ -10,11 +10,20 @@ const ProductCard = ({ product }) => {
   const { favorites, toggleFavorite } = useFavoritesStore();
   const [isFavorite, setIsFavorite] = useState(false);
 
+  // Get the correct product ID from different possible field names
+  const getProductId = () => {
+    return product.id || product.product_id || product._id;
+  };
+
   // Check if this product is in favorites
   useEffect(() => {
-    const isInFavorites = favorites.some(fav => fav.product_id === product.product_id);
+    const productId = getProductId();
+    const isInFavorites = favorites.some(fav => {
+      const favProductId = fav.id || fav.product_id || fav._id;
+      return favProductId === productId;
+    });
     setIsFavorite(isInFavorites);
-  }, [favorites, product.product_id]);
+  }, [favorites, product]);
 
   const handleFavoriteClick = async (e) => {
     e.preventDefault();
@@ -25,11 +34,17 @@ const ProductCard = ({ product }) => {
       return;
     }
 
+    const productId = getProductId();
+    if (!productId) {
+      toast.error("Product ID not found");
+      return;
+    }
+
     // Update UI immediately
     setIsFavorite(!isFavorite);
     
     try {
-      await toggleFavorite(product.product_id);
+      await toggleFavorite(productId);
     } catch (error) {
       // Revert UI if API call fails
       setIsFavorite(!isFavorite);

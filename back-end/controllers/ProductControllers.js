@@ -30,10 +30,18 @@ export const getProduct = async (req, res) =>{
         console.log(err);
     }
 };  
-export const createProduct = async (req, res) =>{
-  const { name, description, fichier_path, category, format, image, logiciel} = req.body;
 
-  if (!name || !fichier_path || !category || !format || !logiciel || !image) {
+export const createProduct = async (req, res) =>{
+  const { name, description, category, format, logiciel } = req.body;
+  
+  // Check if files were uploaded
+  if (!req.files || !req.files.image || !req.files.file) {
+    return res.status(400).json({
+      error: 'Both image and file are required.'
+    });
+  }
+
+  if (!name || !category || !format || !logiciel) {
     return res.status(400).json({
       error: 'All fields are required.'
     });
@@ -45,6 +53,11 @@ export const createProduct = async (req, res) =>{
     if (existingProduct) {
       return res.status(409).json({ error: 'A product with this name already exists.' });
     }
+
+    // Get file paths
+    const imagePath = `/upload/images/${req.files.image[0].filename}`;
+    const filePath = `/upload/files/${req.files.file[0].filename}`;
+
     let id_category;
     if(category){
     const result = await db.one(`
@@ -90,21 +103,14 @@ export const createProduct = async (req, res) =>{
       `,[logiciel]);
       id_logiciel = result.id;
     }
-    let id_image;
-    if(image){
-    const result = await db.one(`
-      WITH inserted AS (
-        INSERT INTO images(path)
-        VALUES ($1)
-        ON CONFLICT (path) DO NOTHING
-        RETURNING id
-      )
-      SELECT id FROM inserted
-      UNION
-      SELECT id FROM images WHERE path = $1;
-      `,[image]);
-      id_image = result.id
-    }
+
+    // Create image record
+    const imageResult = await db.one(`
+      INSERT INTO images(path)
+      VALUES ($1)
+      RETURNING id;
+    `, [imagePath]);
+    const id_image = imageResult.id;
 
     const newProduct = await db.one(`
       INSERT INTO products
@@ -112,7 +118,7 @@ export const createProduct = async (req, res) =>{
       VALUES
         ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *;
-    `, [name, description, fichier_path, id_category, id_format, id_image, id_logiciel]);
+    `, [name, description, filePath, id_category, id_format, id_image, id_logiciel]);
 
     res.status(201).json(newProduct);
 
@@ -125,7 +131,7 @@ export const createProduct = async (req, res) =>{
 export const updateProduct = async (req, res) =>{
   const { id } = req.params;
   console.log(req.body)
-  const { name, description, fichier_path, category, format, image, logiciel } = req.body;
+  const { name, description, category, format, logiciel } = req.body;
   try {
     
     const existingProduct = await db.oneOrNone('SELECT * FROM products WHERE id = $1', [id]);
@@ -248,3 +254,34 @@ export const deleteProduct = async (req, res) =>{
         res.status(500).json({ error: 'Error deleting user' });
     }
 }  
+
+// Search products by title, format, or category
+export const searchProducts = async (req, res) => {
+  const { q } = req.query;
+  
+  if (!q || q.trim() === '') {
+    return res.status(400).json({ error: 'Search query is required' });
+  }
+
+  try {
+    const searchTerm = `%${q.trim()}%`;
+    const products = await db.any(`
+      SELECT DISTINCT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name
+      FROM products p
+      LEFT JOIN categories c ON p.id_category = c.id
+      LEFT JOIN formats f ON p.id_format = f.id
+      LEFT JOIN logiciels l ON p.id_logiciel = l.id
+      WHERE p.name ILIKE $1 
+         OR c.name ILIKE $1 
+         OR f.extension ILIKE $1
+         OR l.name ILIKE $1
+      ORDER BY p.name ASC
+      LIMIT 10
+    `, [searchTerm]);
+
+    res.json(products);
+  } catch (error) {
+    console.log('Error searching products:', error);
+    res.status(500).json({ error: 'Error searching products' });
+  }
+};  
