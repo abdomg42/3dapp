@@ -4,6 +4,7 @@ import FavClickedIcon from '../assets/icons/Favclicked.png';
 import { useFavoritesStore } from '../store/FavoritesStore';
 import { useUserStore } from '../store/UserStore';
 import { toast } from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
   const { user } = useUserStore();
@@ -80,17 +81,18 @@ const ProductCard = ({ product }) => {
       {/* Actions */}
       <div className="flex flex-col md:flex-row gap-2 mt-auto w-full">
         <a
-          href="#"
+          href={`http://localhost:3000/upload/${product.fichier_path}`}
+          download={product.fichier_path}
           className="flex-1 min-w-[90px] whitespace-nowrap bg-[#A6E6B5] border border-[#333] text-[#333] font-medium rounded-xl px-3 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#8fdca3] transition cursor-pointer text-center flex items-center justify-center"
         >
           Download
         </a>
-        <a
-          href="#"
+        <Link
+          to={`http://localhost:5173//products/${product.id}`}
           className="flex-1 min-w-[90px] whitespace-nowrap bg-white border border-[#333] text-[#333] font-medium rounded-xl px-3 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#f3f3f3] transition cursor-pointer text-center flex items-center justify-center"
         >
           details
-        </a>
+        </Link>
       </div>
     </div>
   );
