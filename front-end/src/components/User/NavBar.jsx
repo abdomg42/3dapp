@@ -12,7 +12,7 @@ import Upload from "../../assets/icons/Upload.png"
 const NavBar = ({ onOpenSidebar }) => {
   
   const {user} = useUserStore();
-  const isAdmin = user.role === "admin";
+  const isAdmin = user?.role === "admin";
 
   return (
     <nav className="bg-white shadow px-4 py-2 flex items-center justify-between">

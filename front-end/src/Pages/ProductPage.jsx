@@ -32,6 +32,7 @@ const ProductPage = () => {
         <div className="flex-1 flex flex-col items-center justify-start">
           <span className="text-lg text-[#7A6B3F] font-medium mb-2 self-start">{product.category || 'Category'} / {product.name}</span>
           <img
+            crossOrigin="anonymous"
             src={`http://localhost:3000/images/${product.path}`}
             alt={product.name}
             className="w-[320px] h-[320px] object-contain rounded-2xl shadow-md bg-[#fafafa]"
@@ -59,7 +60,7 @@ const ProductPage = () => {
         <h2 className="text-xl font-semibold text-[#7A6B3F] mb-4">Similar Models</h2>
         <div className="flex gap-8 overflow-x-auto pb-2">
           {similarProducts.map((product,idx) => (
-            <div key={product.id || idx} className="min-w-[220px]">
+            <div key={idx} className="min-w-[220px]">
               <ProductCard product={product} />
             </div>
           ))}

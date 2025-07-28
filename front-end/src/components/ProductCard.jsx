@@ -12,7 +12,7 @@ const ProductCard = ({ product }) => {
       {/* Product image */}
       <div className="flex justify-center items-center bg-[#FAFAFA] rounded-xl mb-6 mt-2 w-full" style={{ height: 170 }}>
         <img
-          crossorigin="anonymous"
+          crossOrigin="anonymous"
           src={`http://localhost:3000/images${product.path}`}
           alt={product.name}
           className="w-full h-full object-contain max-h-38"

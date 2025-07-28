@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom';
 
 const SideBar = ({ isOpen, onClose }) => {
   const {user, logout} = useUserStore();
-  const isAdmin = user.role === "admin";
+  const isAdmin = user?.role === "admin";
 
   return (
     <div
