@@ -31,10 +31,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Serve static files from upload directory
-app.use('/upload', express.static(path.join(process.cwd(), 'upload')));
+app.use('/upload', express.static(path.join(process.cwd(), 'upload/files')));
 
 // Serve images directory
-app.use('/images', express.static(path.join(process.cwd(), 'images')));
+app.use('/images', express.static(path.join(process.cwd(), 'upload/images')));
 
 app.use("/Product",routerProduct);
 app.use("/user",UserRouter);
@@ -42,7 +42,6 @@ app.use("/Category",CategoryRouter);
 app.use("/Format",FormatRouter);
 app.use("/Logiciel",LogicielRouter);
 app.use("/favorite", FavoritesRouter);
-
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });

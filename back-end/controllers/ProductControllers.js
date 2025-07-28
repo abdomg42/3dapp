@@ -55,8 +55,8 @@ export const createProduct = async (req, res) =>{
     }
 
     // Get file paths
-    const imagePath = `/upload/images/${req.files.image[0].filename}`;
-    const filePath = `/upload/files/${req.files.file[0].filename}`;
+    const imagePath = `/${req.files.image[0].filename}`;
+    const filePath = `/${req.files.file[0].filename}`;
 
     let id_category;
     if(category){

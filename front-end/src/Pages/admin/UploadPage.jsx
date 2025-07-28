@@ -7,6 +7,19 @@ const formats = ['format 1', 'format 2', '.xml'];
 const logiciels = ['Logiciel 1', 'Logiciel 2', 'Logiciel 3'];
 
 const UploadPage = () => {
+
+  const handleModelDrop = (e) => {
+  e.preventDefault();
+  const droppedFile = e.dataTransfer.files[0];
+  if (droppedFile) handleModelFileChange({ target: { files: [droppedFile] } });
+};
+
+const handleImageDrop = (e) => {
+  e.preventDefault();
+  const droppedFile = e.dataTransfer.files[0];
+  if (droppedFile) handleImageChange({ target: { files: [droppedFile] } });
+};
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -184,7 +197,7 @@ const UploadPage = () => {
 
         {/* Software */}
         <div>
-          <label className="block mb-2 text-[#333] font-medium">Software *</label>
+          <label className="block mb-2 text-[#333] font-medium">Logiciel *</label>
           <select
             name="logiciel"
             value={formData.logiciel}
@@ -192,7 +205,7 @@ const UploadPage = () => {
             className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
             required
           >
-            <option value="">Select Software</option>
+            <option value="">Select Logiciel</option>
             {logiciels.map(log => <option key={log} value={log}>{log}</option>)}
           </select>
         </div>
@@ -200,7 +213,10 @@ const UploadPage = () => {
         {/* Model File Upload */}
         <div>
           <label className="block mb-2 text-[#333] font-medium">3D Model File *</label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors"
+          onDrop={handleModelDrop}
+          onDragOver={(e) => e.preventDefault()}
+          >
             <input
               type="file"
               onChange={handleModelFileChange}
@@ -209,9 +225,8 @@ const UploadPage = () => {
               id="model-file"
             />
             <label htmlFor="model-file" className="cursor-pointer">
-              <div className="text-4xl mb-2">📁</div>
               <p className="text-gray-600">
-                {modelFile ? modelFile.name : 'Click to select 3D model file'}
+                {modelFile ? modelFile.name : 'Drag or Click to select 3D model file'}
               </p>
               <p className="text-sm text-gray-500 mt-1">
                 Supported formats: 3DS, OBJ, FBX, DAE, BLEND, MAX, MA, MB, STL, PLY, WRL, VRML, 3DM, SKP, DWG, DXF, IGES, STEP, STP
@@ -224,7 +239,11 @@ const UploadPage = () => {
         {/* Image Upload */}
         <div>
           <label className="block mb-2 text-[#333] font-medium">Product Image *</label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+          <div
+            className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors"
+            onDrop={handleImageDrop}
+            onDragOver={(e) => e.preventDefault()} >
+            
             <input
               type="file"
               onChange={handleImageChange}
@@ -235,7 +254,7 @@ const UploadPage = () => {
             <label htmlFor="image-file" className="cursor-pointer">
               <div className="text-4xl mb-2">🖼️</div>
               <p className="text-gray-600">
-                {imageFile ? imageFile.name : 'Click to select product image'}
+                {imageFile ? imageFile.name : 'Drag or Click to select product image'}
               </p>
               <p className="text-sm text-gray-500 mt-1">
                 Supported formats: JPEG, PNG, GIF, WebP
@@ -255,6 +274,14 @@ const UploadPage = () => {
             className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black min-h-[120px] focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter product description..."
           />
+                <button
+      type="button"
+      className="border-2 border-purple-600 bg-white text-purple-500 rounded-lg px-4 py-1.5 ml-2 font-bold shadow-md shadow-purple-300/20
+                cursor-pointer hover:bg-purple-50 hover:shadow-lg hover:-translate-y-0.5 transition duration-200 ease-in-out"
+    >
+      ✨ Generate
+    </button>
+
         </div>
 
         {/* Action Buttons */}
@@ -264,7 +291,7 @@ const UploadPage = () => {
             onClick={handleCancel}
             className="flex-1 bg-gray-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-600 transition-colors"
           >
-            Cancel
+            Reset
           </button>
           <button
             type="submit"
