@@ -12,6 +12,7 @@ import UserRouter from "./routes/UserRoutes.js";
 import CategoryRouter from "./routes/CategoryRoutes.js";
 import FormatRouter from "./routes/FormatRoutes.js";
 import LogicielRouter from "./routes/LogicielRoutes.js";
+import FavoritesRouter from "./routes/FavoritesRoutes.js";
 
 const app = express();
 const port = 3000;
@@ -26,7 +27,7 @@ app.use(helmet());
 app.use(morgan("dev"));
 
 
-const localPath = path.join('C:/Users/USER/Downloads/chair');
+const localPath = path.join('C:/Users/DELL/Downloads/chair');
 app.use('/images', express.static(localPath));
 
 
@@ -46,6 +47,7 @@ app.use("/user",UserRouter);
 app.use("/Category",CategoryRouter);
 app.use("/Format",FormatRouter);
 app.use("/Logiciel",LogicielRouter);
+app.use("/favorite", FavoritesRouter);
 
 
 app.listen(port, () => {

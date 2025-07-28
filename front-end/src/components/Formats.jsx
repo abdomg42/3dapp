@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useCategoryStore } from '../store/CategoryStore';
+import { useProductStore } from '../store/ProductStore';
 
 const ExpandableButtonList = ({ items, selected, setSelected, label }) => {
   const [showAll, setShowAll] = useState(false);
@@ -49,31 +49,25 @@ const ExpandableButtonList = ({ items, selected, setSelected, label }) => {
   );
 };
 
-const Category = () => {
-  const { categories, loadingC, errorC, fetchCategories } = useCategoryStore();
-  const [selectedCategory, setSelectedCategory] = useState(null);
+const Formats = () => {
+  const { formats, fetchFormats } = useProductStore();
+  const [selectedFormat, setSelectedFormat] = useState(null);
 
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    fetchFormats();
+  }, [fetchFormats]);
 
   return (
     <aside className="w-56 min-w-[180px] max-w-xs shadow p-4 h-fit sticky top-8 self-start bg-white rounded-xl">
-      <h2 className="text-2xl font-bold text-[#7A6B3F] mb-4">Categories</h2>
-      {loadingC ? (
-        <div className="text-gray-500">Loading...</div>
-      ) : errorC ? (
-        <div className="text-red-500">{errorC}</div>
-      ) : (
-        <ExpandableButtonList
-          items={categories}
-          selected={selectedCategory}
-          setSelected={setSelectedCategory}
-          label="Category"
-        />
-      )}
+      <h2 className="text-2xl font-bold text-[#7A6B3F] mb-4">Formats</h2>
+      <ExpandableButtonList
+        items={formats}
+        selected={selectedFormat}
+        setSelected={setSelectedFormat}
+        label="Format"
+      />
     </aside>
   );
 };
 
-export default Category;
+export default Formats; 

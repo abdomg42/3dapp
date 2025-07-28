@@ -215,6 +215,7 @@ export const RefreshToken = async (req, res) => {
 };
 export const getProfile = async (req, res) => {
 	try {
+    
 		res.status(200).json(req.user);
 	} catch (error) {
     console.log(error);

@@ -6,6 +6,11 @@ import { toast } from "react-hot-toast";
 const BaseUrl = "http://localhost:3000";
 
 
+function isValidEmail(email) {
+  // Simple email regex
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
 export const useUserStore = create((set, get) => ({
 	user: null,
 	loading: false,
@@ -14,6 +19,20 @@ export const useUserStore = create((set, get) => ({
 	signup: async ({ name, email, password, confirmPassword }) => {
 		set({ loading: true });
 
+		// Normalize email
+		email = email.toLowerCase();
+
+		// Validation
+		if (!isValidEmail(email)) {
+			set({ loading: false });
+			toast.error("Please enter a valid email address");
+			return { success: false };
+		}
+		if (password.length < 8) {
+			set({ loading: false });
+			toast.error("Password must be at least 8 characters");
+			return { success: false };
+		}
 		if (password !== confirmPassword) {
 			set({ loading: false });
 			toast.error("Passwords do not match");
@@ -30,12 +49,27 @@ export const useUserStore = create((set, get) => ({
 		} catch (error) {
 			console.log(error);
 			set({ loading: false });
-			toast.error(error.response.data.message || "An error occurred");
+			toast.error(error.response?.data?.message || "An error occurred");
 			return { success: false };
 		}
 	},
 	login: async (email, password) => {
 		set({ loading: true });
+
+		// Normalize email
+		email = email.toLowerCase();
+
+		// Validation
+		if (!isValidEmail(email)) {
+			set({ loading: false });
+			toast.error("Please enter a valid email address");
+			return;
+		}
+		if (password.length < 8) {
+			set({ loading: false });
+			toast.error("Password must be at least 8 characters");
+			return;
+		}
 
 		try {
 			const res = await axios.post(`${BaseUrl}/user/login`, { email, password });
@@ -45,7 +79,7 @@ export const useUserStore = create((set, get) => ({
 		} catch (error) {
 			console.log(error);
 			set({ loading: false });
-			toast.error(error.response.data.message || "An error occurred"  ,{
+			toast.error(error.response?.data?.message || "An error occurred",{
                 duration: 4000,
                 position: 'top-center'});
 
@@ -55,7 +89,7 @@ export const useUserStore = create((set, get) => ({
 	logout: async () => {
 		try {
 			await axios.post(`${BaseUrl}/user/logout`);
-			set({ user: null });
+			set({ user: null, checkingAuth: false });
 		} catch (error) {
 			toast.error(error.response?.data?.message || "An error occurred during logout");
 		}

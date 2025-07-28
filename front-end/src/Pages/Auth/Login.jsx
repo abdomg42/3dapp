@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import LoginImage from '../../assets/auth/SignUp.png';
 import { useUserStore } from '../../store/UserStore';
+import { Link } from 'react-router-dom';
 
 const Login = () => {
   const login = useUserStore((state) => state.login);
@@ -58,7 +59,7 @@ const Login = () => {
         </form>
         {/* Sign up link */}
         <p className="flex mt-8 text-gray-600 justify-end  items-end">
-          You didn't have an account? <a href="/signup" className="underline font-bold">Sign up</a>
+          You didn't have an account? <Link to="/signup" className="underline font-bold">Sign up</Link>
         </p>
       </div>
       {/* Right side with background image */}

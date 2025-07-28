@@ -34,6 +34,10 @@ const SideBar = ({ isOpen, onClose }) => {
         </div>
         {/* Navigation Links */}
         <nav className="flex flex-col gap-10 mt-10">
+          <Link to="/" className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
+            <img src={HomeIcon} alt="Home" className="w-7 h-7" />
+            Home
+          </Link>
           {isAdmin && (
             <Link to={""} className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
               <img src={Dashboard} alt="Dashboard" className="w-7 h-7" />
@@ -41,24 +45,20 @@ const SideBar = ({ isOpen, onClose }) => {
             </Link>
           )}
           {isAdmin && (
-            <Link to={""} className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
+            <Link to="/admin/upload" className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
               <img src={Upload} alt="Upload" className="w-7 h-7" />
               Upload
             </Link>
           )}
-          <Link to={""} className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
-            <img src={HomeIcon} alt="Home" className="w-7 h-7" />
-            Home
-          </Link>
-          <Link to={""} className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
+          <Link to="/favourites" className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
             <img src={FavIcon} alt="Favorites" className="w-7 h-9 " />
             Favorits
           </Link>
           <button onClick={logout} className="flex cursor-pointer focus:outline-none">
-          <a href="/login" className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
+           <Link to={"/login"} className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
             <img src={LogoutIcon} alt="Log out" className="w-7 h-7 ml-2" />
             Log out
-          </a>
+          </Link>
             </button>
         </nav>
       </div>

@@ -1,13 +1,46 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import HeartIcon from '../assets/icons/Heart.png';
-
+import { useFavoritesStore } from '../store/FavoritesStore';
+import { useUserStore } from '../store/UserStore';
+import { toast } from 'react-hot-toast';
 
 const ProductCard = ({ product }) => {
+  const { user } = useUserStore();
+  const { favorites, toggleFavorite } = useFavoritesStore();
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Check if this product is in favorites
+  useEffect(() => {
+    const isInFavorites = favorites.some(fav => fav.product_id === product.product_id);
+    setIsFavorite(isInFavorites);
+  }, [favorites, product.product_id]);
+
+  const handleFavoriteClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error("Please login to add favorites");
+      return;
+    }
+
+    await toggleFavorite(product.product_id);
+  };
+
   return (
     <div className="rounded-2xl border border-[#E0E0E0] shadow-md bg-white px-4 py-4 w-full flex flex-col h-full font-[Poppins] relative" style={{ fontFamily: "'Poppins', sans-serif" }}>
       {/* Favorite icon */}
-      <button className="absolute top-4 right-4 focus:outline-none">
-        <img src={HeartIcon} alt="Favorite" className='w-7 h-7 opacity-50' />
+      <button 
+        className="absolute top-4 right-4 focus:outline-none hover:scale-110 transition-transform"
+        onClick={handleFavoriteClick}
+      >
+        <img 
+          src={HeartIcon} 
+          alt="Favorite" 
+          className={`w-7 h-7 transition-all duration-200 ${
+            isFavorite ? 'opacity-100 scale-110' : 'opacity-50 hover:opacity-75'
+          }`} 
+        />
       </button>
       {/* Product image */}
       <div className="flex justify-center items-center bg-[#FAFAFA] rounded-xl mb-6 mt-2 w-full" style={{ height: 170 }}>
@@ -24,7 +57,7 @@ const ProductCard = ({ product }) => {
       <div className="flex flex-col md:flex-row gap-2 mt-auto w-full">
         <a
           href="#"
-          className="flex-1 min-w-[90px] whitespace-nowrap bg-[#A6E6B5] border border-[#333] text-[#333] font-medium rounded-xl px-3 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#8fdca3] transition cursor-pointer text-center"
+          className="flex-1 min-w-[90px] whitespace-nowrap bg-[#A6E6B5] border border-[#333] text-[#333] font-medium rounded-xl px-2 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#8fdca3] transition cursor-pointer text-center"
         >
           Download
         </a>

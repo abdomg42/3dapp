@@ -2,8 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { PackageIcon, PlusCircleIcon, RefreshCwIcon } from "lucide-react";
 import { useProductStore } from '../store/ProductStore';
 import { useCategoryStore } from '../store/CategoryStore';
+import { useFavoritesStore } from '../store/FavoritesStore';
+import { useUserStore } from '../store/UserStore';
 import ProductCard from '../components/ProductCard';
 import Category from '../components/Category';
+import Formats from '../components/Formats';
+import Logiciels from '../components/Logiciels';
 
 const filterOptions = [
   { value: 'popularity', label: 'Popularity' },
@@ -16,20 +20,34 @@ const filterOptions = [
 const Home = () => {
   const {products, loading, error, fetchProducts} = useProductStore();
   const {categories, loadingC , errorC, fetchCategories} = useCategoryStore();
+  const { fetchFavorites } = useFavoritesStore();
+  const { user } = useUserStore();
   const [filter, setFilter] = useState('popularity');
+  
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+  
   useEffect(() => {
     fetchCategories();
   }, [fetchCategories]);
+
+  useEffect(() => {
+    if (user) {
+      fetchFavorites();
+    }
+  }, [user, fetchFavorites]);
 
   return (
     <div className="min-h-screen flex flex-row">
       {/* Sidebar */}
       {categories && categories.length > 0 && (
-        <aside className=" lg:w-64 flex-shrink-0  lg:h-screen pt-4 rounded-xl shadow sticky top-0 overflow-y-auto z-30">
-          <Category />
+        <aside className="lg:w-64 flex-shrink-0 lg:h-screen pt-4 rounded-xl shadow sticky top-0 overflow-y-auto z-30">
+          <div className="space-y-4">
+            <Category />
+            <Formats />
+            <Logiciels />
+          </div>
         </aside>
       )}
       {/* Main Content */}

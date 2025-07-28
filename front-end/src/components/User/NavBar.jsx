@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import Humb from "../../assets/icons/Humb.png"
 import logo from "../../assets/Logos/logo.png"
 import Drop from "../../assets/icons/Drop.png"
@@ -20,9 +21,9 @@ const NavBar = ({ onOpenSidebar }) => {
         <button className="cursor-pointer hover:opacity-75 transition" onClick={onOpenSidebar}>
           <img src={Humb} alt="Menu" className="w-7 h-7 " />
         </button>
-        <button className="cursor-pointer hover:opacity-75 transition">
+        <Link to="/" className="cursor-pointer hover:opacity-75 transition">
         <img src={logo} alt="Logo" className="h-9 w-auto sm:h-12" />
-        </button>
+        </Link>
       </div>
 
       <div className="flex-1 mx-2 max-w-xl  lg:flex ">
@@ -41,18 +42,17 @@ const NavBar = ({ onOpenSidebar }) => {
 
       <div className="flex items-center space-x-6 sm:space-x-4 lg:space-x-12 mr-2  md:mr-6">
       {isAdmin && (
-          <button className="cursor-pointer hover:opacity-75 transition">
+          <Link to="/admin/upload" className="cursor-pointer hover:opacity-75 transition">
             <img src={Upload} alt="Upload" className="w-10 h-10 hidden lg:block " />
-          </button>
+          </Link>
         )}
-        <button className="cursor-pointer hover:opacity-75 transition">
+        <Link to="/favourites" className="cursor-pointer hover:opacity-75 transition">
           <img src={Heart} alt="Favorites" className="w-10 h-10 hidden lg:block " />
-        </button>
+        </Link>
         <div className="flex items-center space-x-3 border rounded-full px-4 py-2 sm:px-6 sm:py-3 text-sm text-gray-800">
           <button className="cursor-pointer hover:opacity-75 transition flex items-center px-1 hidden sm:flex">
           <img src={User} alt="User" className="w-7 h-7 sm:w-8 h-8 flex mx-1 " />
           <span className="hidden sm:block text-base sm:text-lg">User</span>
-            <img src={Drop} alt="Dropdown" className="hidden sm:flex w-3 h-2 my-3 ml-4 mt-4" />
           </button>
         </div>
       </div>

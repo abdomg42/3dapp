@@ -10,7 +10,7 @@ UserRouter.post("/createUser",createUser);
 UserRouter.post("/login", loginUser);
 UserRouter.post("/logout", logoutUser);
 UserRouter.post("/RefreshToken", RefreshToken);
-UserRouter.post("/profile", getProfile);
+UserRouter.get("/profile",protectRoute, getProfile);
 
 
 UserRouter.put("/updateUser/:id", protectRoute, adminRoute, updateUser);
