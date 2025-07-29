@@ -39,7 +39,9 @@ const NavBar = ({ onOpenSidebar }) => {
         <div className="flex items-center space-x-3 border rounded-full px-4 py-2 sm:px-6 sm:py-3 text-sm text-gray-800">
           <button className="cursor-pointer hover:opacity-75 transition flex items-center px-1 hidden sm:flex">
           <img src={User} alt="User" className="w-7 h-7 sm:w-8 h-8 flex mx-1 " />
-          <span className="hidden sm:block text-base sm:text-lg">User</span>
+          <span className="hidden sm:block text-base sm:text-lg">
+            {user?.username  || (isAdmin ? 'Admin' : 'User')}
+          </span>
           </button>
         </div>
       </div>

@@ -1,6 +1,5 @@
 import db from "../config/db.js";
 
-
 export const getAllProducts = async (req, res) =>{
     try {
     const products = await db.any(`
@@ -184,30 +183,13 @@ export const updateProduct = async (req, res) =>{
       `,[logiciel]);
       id_logiciel = result.id;
     }
-    let id_image;
-    if(image){
-    const result = await db.one(`
-      WITH inserted AS (
-        INSERT INTO images(path)
-        VALUES ($1)
-        ON CONFLICT (path) DO NOTHING
-        RETURNING id
-      )
-      SELECT id FROM inserted
-      UNION
-      SELECT id FROM images WHERE path = $1;
-      `,[image]);
-      id_image = result.id
-    }
     
     // Step 2: Merge provided values with existing
     const updated = {
       name: name ?? existingProduct.name,
       description: description ?? existingProduct.description,
-      fichier_path: fichier_path ?? existingProduct.fichier_path,
       id_category: id_category ?? existingProduct.id_category,
       id_format: id_format ?? existingProduct.id_format,
-      id_image: id_image ?? existingProduct.id_image,
       id_logiciel: id_logiciel ?? existingProduct.id_logiciel,
     };
 
@@ -216,20 +198,16 @@ export const updateProduct = async (req, res) =>{
       UPDATE products
       SET name = $1,
           description = $2,
-          fichier_path = $3,
-          id_category = $4,
-          id_format = $5,
-          id_image = $6,
-          id_logiciel = $7
-      WHERE id = $8
+          id_category = $3,
+          id_format = $4,
+          id_logiciel = $5
+      WHERE id = $6
       RETURNING *;
     `, [
       updated.name,
       updated.description,
-      updated.fichier_path,
       updated.id_category,
       updated.id_format,
-      updated.id_image,
       updated.id_logiciel,
       id
     ]);
@@ -266,17 +244,17 @@ export const searchProducts = async (req, res) => {
   try {
     const searchTerm = `%${q.trim()}%`;
     const products = await db.any(`
-      SELECT DISTINCT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name
+      SELECT DISTINCT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name ,i.path as path
       FROM products p
       LEFT JOIN categories c ON p.id_category = c.id
       LEFT JOIN formats f ON p.id_format = f.id
       LEFT JOIN logiciels l ON p.id_logiciel = l.id
-      WHERE p.name ILIKE $1 
-         OR c.name ILIKE $1 
+      LEFT JOIN images i ON p.id_image = i.id
+      WHERE p.name ILIKE $1
+         OR c.name ILIKE $1
          OR f.extension ILIKE $1
          OR l.name ILIKE $1
       ORDER BY p.name ASC
-      LIMIT 10
     `, [searchTerm]);
 
     res.json(products);

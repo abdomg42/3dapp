@@ -65,7 +65,9 @@ const SideBar = ({ isOpen, onClose }) => {
       {/* Bottom: User bar */}
       <div className="w-full flex items-center  bg-white border border-[#7A6B3F] rounded-full px-6 py-2 ">
         <img src={UserIcon} alt="User" className="w-7 h-7 " />
-        <span className="text-xl text-[#7A6B3F] font-medium ml-2 text-center justify-center ml-8">{isAdmin ? 'Admin' : 'User'}</span>
+        <span className="text-xl text-[#7A6B3F] font-medium ml-2 text-center justify-center ml-8">
+          {user?.username || (isAdmin ? 'Admin' : 'User')}
+        </span>
       </div>
     </div>
   );

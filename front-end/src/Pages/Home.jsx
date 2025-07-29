@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { PackageIcon, PlusCircleIcon, RefreshCwIcon } from "lucide-react";
 import { useProductStore } from '../store/ProductStore';
 import { useCategoryStore } from '../store/CategoryStore';
 import { useFavoritesStore } from '../store/FavoritesStore';
@@ -8,35 +7,54 @@ import ProductCard from '../components/ProductCard';
 import Category from '../components/Category';
 import Formats from '../components/Formats';
 import Logiciels from '../components/Logiciels';
-
-const filterOptions = [
-  { value: 'popularity', label: 'Popularity' },
-  { value: 'newest', label: 'Newest' },
-  { value: 'oldest', label: 'Oldest' },
-  { value: 'price_low', label: 'Price: Low to High' },
-  { value: 'price_high', label: 'Price: High to Low' },
-];
+import { RefreshCwIcon } from 'lucide-react';
 
 const Home = () => {
-  const {products, loading, error, fetchProducts} = useProductStore();
-  const {categories, loadingC , errorC, fetchCategories} = useCategoryStore();
+  const { products, loading, error, fetchProducts } = useProductStore();
+  const { categories, fetchCategories } = useCategoryStore();
   const { fetchFavorites } = useFavoritesStore();
   const { user } = useUserStore();
-  const [filter, setFilter] = useState('popularity');
-  
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
-  
-  useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+  const [sort, setSort] = useState('newest');
+
+  const filterOptions = [
+    { value: 'newest', label: 'Newest First' },
+    { value: 'oldest', label: 'Oldest First' },
+    { value: 'name-asc', label: 'Name A-Z' },
+    { value: 'name-desc', label: 'Name Z-A' }
+  ];
 
   useEffect(() => {
+    fetchProducts(sort);
+    fetchCategories();
     if (user) {
       fetchFavorites();
     }
-  }, [user, fetchFavorites]);
+  }, [fetchProducts, fetchCategories, fetchFavorites, user, sort]);
+
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
+  };
+
+  const handleRefresh = () => {
+    fetchProducts(sort);
+    fetchCategories();
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-200">
+        <div className="loading loading-spinner loading-lg"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-zinc-200">
+        <div className="alert alert-error">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-row">
@@ -50,48 +68,44 @@ const Home = () => {
           </div>
         </aside>
       )}
+      
       {/* Main Content */}
       <main className="flex-1 w-full px-4 py-8">
-        <div className="flex flex-row justify-end items-center gap-2 mb-4">
-          <select
-            className="border border-gray-300 text-[#7A6B3F] rounded-lg px-4 py-3 text-base md:text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#D6C16B] bg-white"
-            value={filter}
-            onChange={e => setFilter(e.target.value)}
-          >
-            {filterOptions.map(opt => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-          <button className="flex btn btn-ghost btn-circle bg-[#7A6B3F] text-white" onClick={fetchProducts && fetchCategories}>
-            <RefreshCwIcon className="size-5" />
-          </button>
+        <div className="flex flex-row justify-between items-center gap-2 mb-4">
+          {/* Product Count */}
+          <div className="text-lg font-semibold text-[#7A6B3F]">
+            {products.length} {products.length < 2 ? 'Product' : 'Products'} Found
+          </div>
+          
+          {/* Filter and Refresh */}
+          <div className="flex items-center gap-2">
+            <select
+              className="border border-gray-300 text-[#7A6B3F] rounded-lg px-4 py-3 text-base md:text-lg font-semibold focus:outline-none focus:ring-2 focus:ring-[#D6C16B] bg-white"
+              value={sort}
+              onChange={handleSortChange}
+            >
+              {filterOptions.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+            <button 
+              className="flex btn btn-ghost btn-circle bg-[#7A6B3F] text-white" 
+              onClick={handleRefresh}
+            >
+              <RefreshCwIcon className="size-5" />
+            </button>
+          </div>
         </div>
-        {error && <div className="alert alert-error mb-8">{error}</div>}
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="loading loading-spinner loading-lg" />
-          </div>
-        ) : products.length === 0 && !loading ? (
-          <div className="flex flex-col justify-center items-center h-96 space-y-4">
-            <div className="bg-base-100 rounded-full p-6">
-              <PackageIcon className="size-12" />
-            </div>
-            <div className="text-center space-y-2">
-              <h3 className="text-2xl font-semibold ">No products found</h3>
-              <p className="text-gray-500 max-w-sm">
-                Get started by adding your first product to the inventory
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6 lg:gap-8">
-            {products.map((product, idx) => (
-              <ProductCard key={product.id || idx} product={product} />
-            ))}
-          </div>
-        )}
+        
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          {products.map((product, idx) => (
+            <ProductCard key={product.id || idx} product={product} />
+          ))}
+        </div>
       </main>
     </div>
   );
-}
+};
+
 export default Home;

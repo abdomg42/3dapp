@@ -13,6 +13,7 @@ UserRouter.post("/RefreshToken", RefreshToken);
 UserRouter.get("/profile",protectRoute, getProfile);
 
 
+UserRouter.put("/AddMUser", protectRoute, adminRoute, updateUser);
 UserRouter.put("/updateUser/:id", protectRoute, adminRoute, updateUser);
 UserRouter.delete("/deleteUser/:id", protectRoute, adminRoute, deleteUser);
 

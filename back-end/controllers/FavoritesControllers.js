@@ -71,7 +71,7 @@ export const getUserFavorites = async (req, res) => {
 
   try {
     const favorites = await db.any(`
-      SELECT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name
+      SELECT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name, i.path as path
       FROM favorites fav
       JOIN products p ON fav.product_id = p.id
       LEFT JOIN categories c ON p.id_category = c.id

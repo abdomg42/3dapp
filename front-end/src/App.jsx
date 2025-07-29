@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useLocation, Navigate, Link} from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
@@ -6,6 +6,7 @@ import NavBar from './components/User/NavBar';
 import SideBar from './components/User/SideBar';
 import Footer from './components/Footer';
 import UploadPage from './Pages/admin/UploadPage';
+import Dashboard from './Pages/admin/Dashboard';
 
 import Home from './Pages/Home';
 import ProductPage from './Pages/ProductPage';
@@ -13,6 +14,10 @@ import Favourits from './Pages/Favourits';
 import SignUp from './Pages/Auth/SignUp';
 import Login from './Pages/Auth/Login';
 import SignUpSuccess from './Pages/Auth/SignUpSuccess';
+import CategoryFilter from './Pages/CategoryFilter';
+import FormatFilter from './Pages/FormatFilter';
+import LogicielFilter from './Pages/LogicielFilter';
+import SearchResults from './Pages/SearchResults';
 import { useUserStore } from './store/UserStore';
 
 const App = () => {
@@ -25,9 +30,13 @@ const App = () => {
   const hideNavAndFooter = publicPages.includes(location.pathname);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+
   const toggleSidebar = () => {
     setIsSidebarOpen(prev => !prev);
   };
+
+
 
   useEffect(() => {
     checkAuth();
@@ -51,7 +60,10 @@ const App = () => {
     <div className='min-h-screen max-w-8xl mx-auto bg-zinc-200 transition-colors duration-300'>
       {/* Only show navigation for authenticated users */}
       {user && !hideNavAndFooter && <NavBar onOpenSidebar={toggleSidebar} />}
+      
       {user && !hideNavAndFooter && <SideBar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />}
+      
+     
       
       <Routes>
         {/* Public routes */}
@@ -65,7 +77,12 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/products/:id" element={<ProductPage />} />
             <Route path="/favourites" element={<Favourits />} />
+            <Route path="/admin/dashboard" element={isAdmin ? <Dashboard /> : <Navigate to="/" />} />
             <Route path="/admin/upload" element={<UploadPage />} />
+            <Route path="/category/:categoryName" element={<CategoryFilter />} />
+            <Route path="/format/:formatName" element={<FormatFilter />} />
+            <Route path="/logiciel/:logicielName" element={<LogicielFilter />} />
+            <Route path="/search" element={<SearchResults />} />
           </>
         )}
         

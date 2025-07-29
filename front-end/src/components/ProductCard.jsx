@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import HeartIcon from '../assets/icons/Heart.png';
 import FavClickedIcon from '../assets/icons/Favclicked.png';
 import { useFavoritesStore } from '../store/FavoritesStore';
 import { useUserStore } from '../store/UserStore';
 import { toast } from 'react-hot-toast';
-import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
   const { user } = useUserStore();
   const { favorites, toggleFavorite } = useFavoritesStore();
   const [isFavorite, setIsFavorite] = useState(false);
+  const navigate = useNavigate();
 
   // Get the correct product ID from different possible field names
   const getProductId = () => {
-    return product.id || product.product_id || product._id;
+    return product.id || product.product_id ;
   };
 
   // Check if this product is in favorites
@@ -29,7 +30,7 @@ const ProductCard = ({ product }) => {
   const handleFavoriteClick = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     if (!user) {
       toast.error("Please login to add favorites");
       return;
@@ -43,7 +44,7 @@ const ProductCard = ({ product }) => {
 
     // Update UI immediately
     setIsFavorite(!isFavorite);
-    
+
     try {
       await toggleFavorite(productId);
     } catch (error) {
@@ -51,6 +52,53 @@ const ProductCard = ({ product }) => {
       setIsFavorite(!isFavorite);
     }
   };
+
+  const handleDownload = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    try {
+      // Get the file path from the product
+      const filePath = product.fichier_path ;
+      if (!filePath) {
+        toast.error("No file available for download");
+        return;
+      }
+
+      // Create the full URL for the file
+      const fileUrl = `http://localhost:3000/upload${filePath}`;
+      
+      // Create a temporary link element to trigger download
+      const link = document.createElement('a');
+      link.href = fileUrl;
+      link.download = product.name || 'product-file';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.promise("Download started!");
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error("Failed to download file");
+    }
+  };
+
+  const handleDetails = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const productId = getProductId();
+    if (!productId) {
+      toast.error("Product ID not found");
+      return;
+    }
+    
+    navigate(`/products/${productId}`);
+  };
+
+  const imageUrl = `http://localhost:3000/images${product.path}` ;
+  console.log(imageUrl);
+  console.log(product);
 
   return (
     <div className="rounded-2xl border border-[#E0E0E0] shadow-md bg-white px-4 py-4 w-full flex flex-col h-full font-[Poppins] relative" style={{ fontFamily: "'Poppins', sans-serif" }}>
@@ -69,29 +117,28 @@ const ProductCard = ({ product }) => {
       </button>
       {/* Product image */}
       <div className="flex justify-center items-center bg-[#FAFAFA] rounded-xl mb-6 mt-2 w-full" style={{ height: 170 }}>
-        <img
-          crossOrigin="anonymous"
-          src={`http://localhost:3000/images${product.path}`}
-          alt={product.name}
-          className="w-full h-full object-contain max-h-38"
-        />
+          <img
+            crossOrigin="anonymous"
+            src={imageUrl}
+            alt={product.name}
+            className="w-full h-full object-contain max-h-38"
+          />
       </div>
       {/* Product name */}
       <div className="font-bold text-2xl text-[#333] mb-6 ml-2">{product.name}</div>
       {/* Actions */}
       <div className="flex flex-col md:flex-row gap-2 mt-auto w-full">
-        <a
-          href={`http://localhost:3000/upload/${product.fichier_path}`}
-          download={product.fichier_path}
+        <button
+          onClick={handleDownload}
           className="flex-1 min-w-[90px] whitespace-nowrap bg-[#A6E6B5] border border-[#333] text-[#333] font-medium rounded-xl px-3 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#8fdca3] transition cursor-pointer text-center flex items-center justify-center"
         >
           Download
-        </a>
+        </button>
         <Link
-          to={`http://localhost:5173//products/${product.id}`}
+          to={`/products/${getProductId()}`}
           className="flex-1 min-w-[90px] whitespace-nowrap bg-white border border-[#333] text-[#333] font-medium rounded-xl px-3 py-1 text-sm md:px-5 md:py-2 md:text-base hover:bg-[#f3f3f3] transition cursor-pointer text-center flex items-center justify-center"
         >
-          details
+          Details
         </Link>
       </div>
     </div>

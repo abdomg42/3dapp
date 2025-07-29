@@ -58,7 +58,7 @@ const Favourits = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 lg:gap-8">
           {favorites.map((product, idx) => (
-            <ProductCard key={idx} product={product} />
+            <ProductCard key={idx || product.id} product={product} />
           ))}
         </div>
       )}
