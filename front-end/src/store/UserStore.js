@@ -113,8 +113,9 @@ export const useUserStore = create((set, get) => ({
 		set({ checkingAuth: true });
 		try {
 			const response = await axios.post(`${BaseUrl}/user/RefreshToken`);
-			set({ checkingAuth: false });
-			return response.data;
+			if (response.data.user) {
+				set({ user: response.data.user, checkingAuth: false });
+			}
 		} catch (error) {
 			set({ user: null, checkingAuth: false });
 			throw error;
@@ -122,7 +123,6 @@ export const useUserStore = create((set, get) => ({
 	},
 }));
 
-// TODO: Implement the axios interceptors for refreshing access token
 
 // Axios interceptor for token refresh
 let refreshPromise = null;
@@ -149,6 +149,8 @@ axios.interceptors.response.use(
 				return axios(originalRequest);
 			} catch (refreshError) {
 				// If refresh fails, redirect to login or handle as needed
+				refreshPromise = null;
+                console.log("Refresh failed, logging out:", refreshError);
 				useUserStore.getState().logout();
 				return Promise.reject(refreshError);
 			}

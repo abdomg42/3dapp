@@ -1,13 +1,13 @@
 import React from 'react';
-import BigLogo from '../../assets/Logos/BigLogo.png';
-import HomeIcon from '../../assets/icons/HomeIcon.png';
-import FavIcon from '../../assets/icons/Fav.png';
-import LogoutIcon from '../../assets/icons/Logout.png';
-import UserIcon from '../../assets/icons/User.png';
-import HumbL from '../../assets/icons/HumbL.png';
-import Dashboard from '../../assets/icons/Dashboard.png';
-import Upload from '../../assets/icons/Upload.png';
-import { useUserStore } from '../../store/UserStore';
+import BigLogo from '../assets/Logos/BigLogo.png';
+import HomeIcon from '../assets/icons/HomeIcon.png';
+import FavIcon from '../assets/icons/Fav.png';
+import LogoutIcon from '../assets/icons/Logout.png';
+import UserIcon from '../assets/icons/User.png';
+import HumbL from '../assets/icons/HumbL.png';
+import Dashboard from '../assets/icons/Dashboard.png';
+import Upload from '../assets/icons/Upload.png';
+import { useUserStore } from '../store/UserStore';
 import { Link } from 'react-router-dom';
 
 const SideBar = ({ isOpen, onClose }) => {
@@ -39,7 +39,7 @@ const SideBar = ({ isOpen, onClose }) => {
             Home
           </Link>
           {isAdmin && (
-            <Link to={""} className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
+            <Link to="/admin/dashboard" className="flex items-center gap-4 text-xl text-[#7A6B3F] font-medium hover:opacity-80">
               <img src={Dashboard} alt="Dashboard" className="w-7 h-7" />
               Dashboard
             </Link>
@@ -65,8 +65,8 @@ const SideBar = ({ isOpen, onClose }) => {
       {/* Bottom: User bar */}
       <div className="w-full flex items-center  bg-white border border-[#7A6B3F] rounded-full px-6 py-2 ">
         <img src={UserIcon} alt="User" className="w-7 h-7 " />
-        <span className="text-xl text-[#7A6B3F] font-medium ml-2 text-center justify-center ml-8">
-          {user?.username || (isAdmin ? 'Admin' : 'User')}
+        <span className="text-xl text-[#7A6B3F] font-medium  text-center justify-center ml-8">
+          {user?.name || (isAdmin ? 'Admin' : 'User')}
         </span>
       </div>
     </div>

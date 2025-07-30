@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import {Pencil, Trash, Edit } from 'lucide-react';
 import { useProductStore } from '../store/ProductStore';
 import SimilarProducts from '../components/SimilarProducts';
 import HeartIcon from '../assets/icons/Heart.png';
 import { toast } from 'react-hot-toast';
-import AdminActionButtons from '../components/admin/AdminActionButtons';
 import ProductUpdateDialog from '../components/admin/ProductUpdateDialog';
 import { useUserStore } from '../store/UserStore';
 
@@ -16,6 +15,7 @@ const ProductPage = () => {
   const [showUpdateDialog, setShowUpdateDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (id) fetchProduct(id);
@@ -44,7 +44,7 @@ const ProductPage = () => {
       link.click();
       document.body.removeChild(link);
       
-      toast.success("Download started!");
+      toast.promise("Download started!");
     } catch (error) {
       console.error('Download error:', error);
       toast.error("Failed to download file");
@@ -63,11 +63,13 @@ const ProductPage = () => {
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await useProductStore.getState().deleteProduct(product.id);
+      await useProductStore.getState().deleteProduct(product.id || product.product_id);
       setShowDeleteConfirm(false);
       toast.success("Product deleted successfully");
       // Optionally redirect after delete
+      navigate('/', { replace: true })
     } catch (error) {
+      console.error('Delete error:', error);
       toast.error("Failed to delete product");
     } finally {
       setIsDeleting(false);
@@ -93,7 +95,7 @@ const ProductPage = () => {
             crossOrigin="anonymous"
             src={`http://localhost:3000/images${product.path}`}
             alt={product.name}
-            className="w-[520px] h-[520px] object-contain rounded-2xl p-4 my-2 shadow-md bg-[#fafafa]"
+            className="w-[520px] h-[520px] object-contain rounded-2xl  my-2 shadow-md bg-[#fafafa]"
           />
         </div>
         {/* Right: Product Info */}
@@ -146,23 +148,55 @@ const ProductPage = () => {
       )}
       {/* Delete Confirmation Modal */}
       {isAdmin && showDeleteConfirm && (
-        <div className="fixed inset-0 bg-zinc-200 bg-opacity-90 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-lg">
-            <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-[99999] p-4"
+          style={{ 
+            position: 'fixed', 
+            top: 0, 
+            left: 0, 
+            right: 0, 
+            bottom: 0, 
+            zIndex: 99999,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '1rem'
+          }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowDeleteConfirm(false);
+            }
+          }}
+        >
+          <div 
+            className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full mx-4"
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '0.75rem',
+              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+              padding: '1.5rem',
+              maxWidth: '28rem',
+              width: '100%',
+              margin: '0 1rem'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 className="text-lg text-red-600 font-semibold mb-4">Confirm Delete</h3>
             <p className="text-gray-600 mb-6">
               Are you sure you want to delete "{product.name}"? This action cannot be undone.
             </p>
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 cursor-pointer text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 disabled={isDeleting}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 disabled:opacity-50"
+                className="px-4 py-2 bg-red-500 cursor-pointer text-white rounded-lg hover:bg-red-600 disabled:opacity-50 transition-colors"
                 disabled={isDeleting}
               >
                 {isDeleting ? 'Deleting...' : 'Delete'}

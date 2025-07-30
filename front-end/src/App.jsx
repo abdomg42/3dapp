@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useLocation, Navigate, Link} from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
-import NavBar from './components/User/NavBar';
-import SideBar from './components/User/SideBar';
+import NavBar from './components/NavBar';
+import SideBar from './components/SideBar';
 import Footer from './components/Footer';
 import UploadPage from './Pages/admin/UploadPage';
 import Dashboard from './Pages/admin/Dashboard';
@@ -19,8 +19,15 @@ import FormatFilter from './Pages/FormatFilter';
 import LogicielFilter from './Pages/LogicielFilter';
 import SearchResults from './Pages/SearchResults';
 import { useUserStore } from './store/UserStore';
+import ImageSearchModal from './components/ImageSearchModal';
 
 const App = () => {
+
+  // In App.jsx, add this state:
+const [showImageModal, setShowImageModal] = useState(false);
+
+
+
   const location = useLocation();
   const { user, checkAuth, checkingAuth } = useUserStore();
   const isAdmin = user?.role === "admin";
@@ -59,7 +66,7 @@ const App = () => {
   return (
     <div className='min-h-screen max-w-8xl mx-auto bg-zinc-200 transition-colors duration-300'>
       {/* Only show navigation for authenticated users */}
-      {user && !hideNavAndFooter && <NavBar onOpenSidebar={toggleSidebar} />}
+      {user && !hideNavAndFooter && <NavBar onOpenSidebar={toggleSidebar} onOpenImageModal={() => setShowImageModal(true)} />}
       
       {user && !hideNavAndFooter && <SideBar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />}
       
@@ -89,9 +96,12 @@ const App = () => {
         {/* Catch all route - redirect to login */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-      
+      {showImageModal && (
+        <ImageSearchModal onClose={() => setShowImageModal(false)} />
+      )}
       {/* Only show footer for authenticated users */}
       {user && !hideNavAndFooter && <Footer />}
+      
       <Toaster toastOptions={{className: '', style: {border: '1px solid #713200',padding: '18px',color: '#713200'}}}/>
     </div>
   );

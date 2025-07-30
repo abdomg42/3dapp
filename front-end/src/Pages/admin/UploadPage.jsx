@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useProductStore } from '../../store/ProductStore';
 import { toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
+import { useCategoryStore } from '../../store/CategoryStore';
+import { useProductSearchStore } from '../../store/ProductSearchStore';
 
-const categories = ['Cat1', 'Category 2', 'Category 3'];
-const formats = ['format 1', 'format 2', '.xml'];
-const logiciels = ['Logiciel 1', 'Logiciel 2', 'Logiciel 3'];
 
 const UploadPage = () => {
+  // Move hooks inside the component
+  const { categories, loadingC, errorC, fetchCategories } = useCategoryStore();
+  const { formats, fetchFormats, logiciels, fetchLogiciels } = useProductStore();
+
+  useEffect(() => {
+    fetchCategories();
+    fetchFormats();
+    fetchLogiciels();
+  }, [fetchCategories, fetchFormats, fetchLogiciels]);
+
 
   const handleModelDrop = (e) => {
   e.preventDefault();
@@ -67,7 +76,7 @@ const handleImageDrop = (e) => {
     const file = e.target.files[0];
     if (file) {
       // Validate 3D model file
-      const allowedExtensions = ['.3ds', '.obj', '.fbx', '.dae', '.blend', '.max', '.ma', '.mb', '.stl', '.ply', '.wrl', '.vrml', '.3dm', '.skp', '.dwg', '.dxf', '.iges', '.step', '.stp'];
+      const allowedExtensions = ['.3ds', '.zip', '.rar', '.obj', '.fbx', '.dae', '.blend', '.max', '.ma', '.mb', '.stl', '.ply', '.wrl', '.vrml', '.3dm', '.skp', '.dwg', '.dxf', '.iges', '.step', '.stp'];
       const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
       
       if (!allowedExtensions.includes(fileExtension)) {
@@ -184,8 +193,12 @@ const handleImageDrop = (e) => {
               className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="">Select Category</option>
-              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            <option value="">Select Category</option>
+            {categories && categories.map(cat => (
+              <option key={cat.id} value={cat.name }>
+                {cat.name || cat}
+              </option>
+            ))}
             </select>
           </div>
           
@@ -198,8 +211,12 @@ const handleImageDrop = (e) => {
               className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-              <option value="">Select Format</option>
-              {formats.map(fmt => <option key={fmt} value={fmt}>{fmt}</option>)}
+            <option value="">Select Format</option>
+            {formats && formats.map(fmt => (
+              <option key={fmt.id} value={fmt.extension }>
+                {fmt.extension }
+              </option>
+            ))}
             </select>
           </div>
         </div>
@@ -215,7 +232,11 @@ const handleImageDrop = (e) => {
             required
           >
             <option value="">Select Logiciel</option>
-            {logiciels.map(log => <option key={log} value={log}>{log}</option>)}
+            {logiciels && logiciels.map(log => (
+              <option key={log.id } value={log.name}>
+                {log.name }
+              </option>
+            ))}
           </select>
         </div>
 
@@ -241,7 +262,7 @@ const handleImageDrop = (e) => {
               <input
                 type="file"
                 onChange={handleModelFileChange}
-                accept=".3ds,.obj,.fbx,.dae,.blend,.max,.ma,.mb,.stl,.ply,.wrl,.vrml,.3dm,.skp,.dwg,.dxf,.iges,.step,.stp"
+                accept=".3ds,.obj,.fbx,.zip,.rar,.dae,.blend,.max,.ma,.mb,.stl,.ply,.wrl,.vrml,.3dm,.skp,.dwg,.dxf,.iges,.step,.stp"
                 className="hidden"
                 id="model-file"
               />

@@ -197,6 +197,12 @@ export const RefreshToken = async (req, res) => {
 			return res.status(401).json({ message: "Invalid refresh token" });
 		}
 
+		// Get user data
+		const user = await db.oneOrNone('SELECT id, name, email, role FROM users WHERE id = $1', [decoded.userId]);
+		if (!user) {
+			return res.status(401).json({ message: "User not found" });
+		}
+
 		const accessToken = jwt.sign({ userId: decoded.userId }, `${JWT_SECRET}` , { expiresIn: "15m" });
 
 		res.cookie("accessToken", accessToken, {
@@ -206,7 +212,15 @@ export const RefreshToken = async (req, res) => {
 			maxAge: 15 * 60 * 1000,
 		});
 
-		res.json({ message: "Token refreshed successfully" });
+		res.json({ 
+			message: "Token refreshed successfully",
+			user: {
+				id: user.id,
+				name: user.name,
+				email: user.email,
+				role: user.role
+			}
+		});
 	} catch (error) {
     console.log(error)
 		console.log("Error in refreshToken controller", error.message);

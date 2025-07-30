@@ -12,10 +12,11 @@ export const getProductsByCategory = async (req, res) => {
     else if (sort === 'name-desc') orderBy = 'p.name DESC';
 
     const products = await db.any(`
-      SELECT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name
+      SELECT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name, i.path as path
       FROM products p
       LEFT JOIN categories c ON p.id_category = c.id
       LEFT JOIN formats f ON p.id_format = f.id
+      LEFT JOIN images i ON p.id_image = i.id
       LEFT JOIN logiciels l ON p.id_logiciel = l.id
       WHERE c.name ILIKE $1
       ORDER BY ${orderBy}
@@ -40,10 +41,11 @@ export const getProductsByFormat = async (req, res) => {
     else if (sort === 'name-desc') orderBy = 'p.name DESC';
 
     const products = await db.any(`
-      SELECT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name
+      SELECT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name ,i.path as path
       FROM products p
       LEFT JOIN categories c ON p.id_category = c.id
       LEFT JOIN formats f ON p.id_format = f.id
+      LEFT JOIN images i ON p.id_image = i.id
       LEFT JOIN logiciels l ON p.id_logiciel = l.id
       WHERE f.extension ILIKE $1
       ORDER BY ${orderBy}
@@ -68,10 +70,11 @@ export const getProductsByLogiciel = async (req, res) => {
     else if (sort === 'name-desc') orderBy = 'p.name DESC';
 
     const products = await db.any(`
-      SELECT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name
+      SELECT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name, i.path as path
       FROM products p
       LEFT JOIN categories c ON p.id_category = c.id
       LEFT JOIN formats f ON p.id_format = f.id
+      LEFT JOIN images i ON p.id_image = i.id
       LEFT JOIN logiciels l ON p.id_logiciel = l.id
       WHERE l.name ILIKE $1
       ORDER BY ${orderBy}

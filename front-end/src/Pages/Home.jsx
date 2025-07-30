@@ -4,17 +4,20 @@ import { useCategoryStore } from '../store/CategoryStore';
 import { useFavoritesStore } from '../store/FavoritesStore';
 import { useUserStore } from '../store/UserStore';
 import ProductCard from '../components/ProductCard';
-import Category from '../components/Category';
-import Formats from '../components/Formats';
-import Logiciels from '../components/Logiciels';
+import Pagination from '../components/Pagination';
 import { RefreshCwIcon } from 'lucide-react';
+import SearchBar from '../components/SearchBar';
+import FilterSidebar from '../components/FilterSideBar';
 
 const Home = () => {
   const { products, loading, error, fetchProducts } = useProductStore();
-  const { categories, fetchCategories } = useCategoryStore();
   const { fetchFavorites } = useFavoritesStore();
   const { user } = useUserStore();
   const [sort, setSort] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
 
   const filterOptions = [
     { value: 'newest', label: 'Newest First' },
@@ -23,13 +26,24 @@ const Home = () => {
     { value: 'name-desc', label: 'Name Z-A' }
   ];
 
+  // Calculate paginated products
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const paginatedProducts = products.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Reset to page 1 if products change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [products]);
+
   useEffect(() => {
     fetchProducts(sort);
-    fetchCategories();
     if (user) {
       fetchFavorites();
     }
-  }, [fetchProducts, fetchCategories, fetchFavorites, user, sort]);
+  }, [fetchProducts,  fetchFavorites, user, sort]);
 
   const handleSortChange = (e) => {
     setSort(e.target.value);
@@ -58,19 +72,16 @@ const Home = () => {
 
   return (
     <div className="min-h-screen flex flex-row">
-      {/* Sidebar */}
-      {categories && categories.length > 0 && (
+
         <aside className="lg:w-64 flex-shrink-0 lg:h-screen pt-4 rounded-xl shadow sticky top-0 overflow-y-auto z-30 bg-white p-4 my-2">
           <div className="space-y-6">
-            <Category />
-            <Formats />
-            <Logiciels />
+          <FilterSidebar />
           </div>
         </aside>
-      )}
-      
+
       {/* Main Content */}
       <main className="flex-1 w-full px-4 py-8">
+        
         <div className="flex flex-row justify-between items-center gap-2 mb-4">
           {/* Product Count */}
           <div className="text-lg font-semibold text-[#7A6B3F]">
@@ -99,10 +110,16 @@ const Home = () => {
         
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-          {products.map((product, idx) => (
+          {paginatedProducts.map((product, idx) => (
             <ProductCard key={product.id || idx} product={product} />
           ))}
         </div>
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </main>
     </div>
   );
