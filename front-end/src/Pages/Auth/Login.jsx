@@ -1,21 +1,26 @@
 import React, { useState } from 'react';
 import LoginImage from '../../assets/auth/SignUp.png';
 import { useUserStore } from '../../store/UserStore';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const login = useUserStore((state) => state.login);
   const loading = useUserStore((state) => state.loading);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const result = await login(email, password);
-    if (result?.success) {
+    try {
+      await login(email, password);
+      // If login is successful, navigate to home
       navigate("/");
+    } catch (error) {
+      // Error is already handled in the store with toast
+      console.log("Login failed:", error);
+      // Stay on login page, loading state is already cleared in the store
     }
-    
   };
 
   return (
@@ -36,6 +41,7 @@ const Login = () => {
               value={email}
               onChange={e => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           {/* Password */}
@@ -50,11 +56,12 @@ const Login = () => {
               value={password}
               onChange={e => setPassword(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
           {/* Log in button */}
           <button
-            className="w-full h-12 bg-[#333333] text-white font-bold rounded-full hover:bg-gray-800 transition duration-300"
+            className="w-full h-12 bg-[#333333] text-white font-bold rounded-full hover:bg-gray-800 transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             type="submit"
             disabled={loading}
           >

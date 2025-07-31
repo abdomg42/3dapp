@@ -65,12 +65,10 @@ const ProductPage = () => {
     try {
       await useProductStore.getState().deleteProduct(product.id || product.product_id);
       setShowDeleteConfirm(false);
-      toast.success("Product deleted successfully");
       // Optionally redirect after delete
       navigate('/', { replace: true })
     } catch (error) {
       console.error('Delete error:', error);
-      toast.error("Failed to delete product");
     } finally {
       setIsDeleting(false);
     }
@@ -122,7 +120,15 @@ const ProductPage = () => {
           <h1 className="text-2xl md:text-3xl font-bold text-[#333]">{product.name}</h1>
           <div>
             <span className="text-xl font-semibold text-[#333]">Description :</span>
-            <p className="mt-2 text-lg text-gray-600">{product.description || 'No description available.'}</p>
+            <p 
+              className="mt-2 text-lg text-gray-600"
+              style={{
+                whiteSpace: 'pre-wrap',
+                wordWrap: 'break-word'
+              }}
+            >
+              {product.description || 'No description available.'}
+            </p>
           </div>
           <div className="flex gap-4 mt-4">
             <button 

@@ -1,8 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { useProductSearchStore } from '../store/ProductSearchStore';
 import gallery from '../assets/icons/gallery.png'
 
 const ImageSearchModal = ({ onClose }) => {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
+  const navigate = useNavigate();
+  const { searchByImage, imageSearchLoading } = useProductSearchStore();
+
   // Prevent body scroll when modal is open
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -23,12 +31,24 @@ const ImageSearchModal = ({ onClose }) => {
     }
   };
 
-  const [selectedFile, setSelectedFile] = useState(null);
-  const fileInputRef = useRef(null);
-
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0]);
+      const file = e.target.files[0];
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please select a valid image file (JPEG, PNG, GIF, WebP)');
+        return;
+      }
+      
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image file size must be less than 5MB');
+        return;
+      }
+      
+      setSelectedFile(file);
     }
   };
 
@@ -36,13 +56,57 @@ const ImageSearchModal = ({ onClose }) => {
     e.preventDefault();
     e.stopPropagation();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setSelectedFile(e.dataTransfer.files[0]);
+      const file = e.dataTransfer.files[0];
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please select a valid image file (JPEG, PNG, GIF, WebP)');
+        return;
+      }
+      
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Image file size must be less than 5MB');
+        return;
+      }
+      
+      setSelectedFile(file);
     }
   };
 
   const handleDragOver = (e) => {
     e.preventDefault();
     e.stopPropagation();
+  };
+
+  const handleSearch = async () => {
+    if (!selectedFile) {
+      toast.error('Please select an image first');
+      return;
+    }
+
+    try {
+      await searchByImage(selectedFile);
+      
+      // For now, we'll navigate to search results with a special query
+      // In a real implementation, you might want to create a dedicated image search results page
+      const searchQuery = `image-search-${Date.now()}`;
+      navigate(`/search?q=${encodeURIComponent(searchQuery)}&type=image`);
+      
+      onClose();
+      
+    } catch (error) {
+      console.error('Image search error:', error);
+      // Error is already handled in the store
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const modalContent = (
@@ -97,11 +161,36 @@ const ImageSearchModal = ({ onClose }) => {
               </button>
               {selectedFile && (
                 <div className="mt-2 text-[#7A6B3F] font-medium text-center">
-                  Selected: {selectedFile.name}
+                  <p>Selected: {selectedFile.name}</p>
+                  <p className="text-sm text-gray-500">Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                  <button
+                    type="button"
+                    onClick={handleRemoveFile}
+                    className="mt-2 px-4 py-1 text-sm text-red-600 hover:text-red-800 underline"
+                  >
+                    Remove
+                  </button>
                 </div>
               )}
             </div>
           </div>
+
+          {/* Search Button */}
+          {selectedFile && (
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={handleSearch}
+                disabled={imageSearchLoading}
+                className="cursor-pointer px-8 py-3 rounded-full bg-green-600 text-white text-lg font-semibold shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              >
+                {imageSearchLoading ? 'Searching...' : 'Search by Image'}
+              </button>
+              <p className="mt-2 text-sm text-gray-600">
+                Find similar products based on this image
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>

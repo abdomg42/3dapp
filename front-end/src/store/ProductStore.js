@@ -9,8 +9,6 @@ export const useProductStore = create((set,get) => ({
     loading: false,
     error: null,
     currentProduct: null,
-    formats: [],
-    logiciels: [],
 
     addProduct: async (formData) => {
         console.log("addProduct called");
@@ -59,7 +57,8 @@ export const useProductStore = create((set,get) => ({
         try {
             await axios.delete(`${BaseUrl}/product/deleteProduct/${productId}`);
             await get().fetchProducts();
-          } catch (error) {
+            toast.success("Product deleted successfully");
+        } catch (error) {
             console.log("Error deleting product:", error);
             set({ error: "Error deleting product", loading: false });
             toast.error("Failed to delete product");
@@ -149,25 +148,5 @@ export const useProductStore = create((set,get) => ({
         } finally {
           set({ loading: false });
         }
-    },
-
-    fetchFormats: async () => {
-      try {
-        const response = await axios.get(`${BaseUrl}/Format/getFormats`);
-        set({ formats: response.data });
-      } catch (error) {
-        console.log("Error fetching formats", error);
-        toast.error("Failed to load formats");
-      }
-    },
-
-    fetchLogiciels: async () => {
-      try {
-        const response = await axios.get(`${BaseUrl}/Logiciel/getLogiciels`);
-        set({ logiciels: response.data });
-      } catch (error) {
-        console.log("Error fetching logiciels", error);
-        toast.error("Failed to load logiciels");
-      }
     },
 }))

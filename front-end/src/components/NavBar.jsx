@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Humb from "../assets/icons/Humb.png"
 import logo from "../assets/Logos/logo.png"
-import Drop from "../assets/icons/Drop.png"
 import Heart from "../assets/icons/Heart.png"
 import User from "../assets/icons/User.png"
 import Dashboard from '../assets/icons/Dashboard.png';

@@ -3,13 +3,15 @@ import { useProductStore } from '../../store/ProductStore';
 import { toast } from 'react-hot-toast';
 import { X } from 'lucide-react';
 import { useCategoryStore } from '../../store/CategoryStore';
-import { useProductSearchStore } from '../../store/ProductSearchStore';
+import { useFormatStore } from '../../store/FormatStore';
+import { useLogicielStore } from '../../store/LogicielStore';
 
 
 const UploadPage = () => {
   // Move hooks inside the component
   const { categories, loadingC, errorC, fetchCategories } = useCategoryStore();
-  const { formats, fetchFormats, logiciels, fetchLogiciels } = useProductStore();
+  const { formats, fetchFormats } = useFormatStore();
+  const { logiciels, fetchLogiciels } = useLogicielStore();
 
   useEffect(() => {
     fetchCategories();
@@ -142,7 +144,6 @@ const handleImageDrop = (e) => {
       setImageFile(null);
       setModelFile(null);
       
-      toast.success('Product uploaded successfully!');
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload product');

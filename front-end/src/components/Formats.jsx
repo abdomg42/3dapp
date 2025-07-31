@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProductStore } from '../store/ProductStore';
+import { useFormatStore } from '../store/FormatStore';
 
 const ExpandableButtonList = ({ items, selected, setSelected, onItemClick }) => {
   const [showAll, setShowAll] = useState(false);
@@ -62,7 +62,7 @@ const ExpandableButtonList = ({ items, selected, setSelected, onItemClick }) => 
 };
 
 const Formats = () => {
-  const { formats, fetchFormats } = useProductStore();
+  const { formats, fetchFormats } = useFormatStore();
   const [selectedFormat, setSelectedFormat] = useState(null);
   const navigate = useNavigate();
 

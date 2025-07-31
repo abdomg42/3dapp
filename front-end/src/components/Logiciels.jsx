@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useProductStore } from '../store/ProductStore';
+import { useLogicielStore } from '../store/LogicielStore';
 
 const ExpandableButtonList = ({ items, selected, setSelected, onItemClick }) => {
   const [showAll, setShowAll] = useState(false);
@@ -62,7 +62,7 @@ const ExpandableButtonList = ({ items, selected, setSelected, onItemClick }) => 
 };
 
 const Logiciels = () => {
-  const { logiciels, fetchLogiciels } = useProductStore();
+  const { logiciels, fetchLogiciels } = useLogicielStore();
   const [selectedLogiciel, setSelectedLogiciel] = useState(null);
   const navigate = useNavigate();
 

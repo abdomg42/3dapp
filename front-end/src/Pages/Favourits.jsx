@@ -1,19 +1,34 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { PackageIcon, HeartIcon } from "lucide-react";
 import { useFavoritesStore } from '../store/FavoritesStore';
 import { useUserStore } from '../store/UserStore';
 import ProductCard from '../components/ProductCard';
+import Pagination from '../components/Pagination';
 import { Navigate } from 'react-router-dom';
 
 const Favourits = () => {
   const { user } = useUserStore();
   const { favorites, loading, error, fetchFavorites } = useFavoritesStore();
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     if (user) {
       fetchFavorites();
     }
   }, [user, fetchFavorites]);
+
+  // Reset to page 1 if favorites change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [favorites]);
+
+  // Calculate paginated favorites
+  const totalPages = Math.ceil(favorites.length / itemsPerPage);
+  const paginatedFavorites = favorites.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Redirect to login if not authenticated
   if (!user) {
@@ -57,10 +72,18 @@ const Favourits = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 lg:gap-8">
-          {favorites.map((product, idx) => (
+          {paginatedFavorites.map((product, idx) => (
             <ProductCard key={idx || product.id} product={product} />
           ))}
         </div>
+      )}
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       )}
     </div>
   );

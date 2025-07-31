@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useProductSearchStore } from '../store/ProductSearchStore';
 import ProductCard from '../components/ProductCard';
 import FilterHeader from '../components/FilterHeader';
+import Pagination from '../components/Pagination';
 import { SearchIcon, PackageIcon } from 'lucide-react';
 
 const SearchResults = () => {
@@ -10,12 +11,19 @@ const SearchResults = () => {
   const query = searchParams.get('q') || '';
   const { searchResults, searchLoading, searchProductsForPage } = useProductSearchStore();
   const [sort, setSort] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     if (query.trim()) {
       searchProductsForPage(query);
     }
   }, [query, searchProductsForPage]);
+
+  // Reset to page 1 if search results change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchResults]);
 
   const handleSortChange = (e) => {
     setSort(e.target.value);
@@ -26,6 +34,13 @@ const SearchResults = () => {
     const regex = new RegExp(`(${searchQuery})`, 'gi');
     return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
   };
+
+  // Calculate paginated search results
+  const totalPages = Math.ceil(searchResults.length / itemsPerPage);
+  const paginatedResults = searchResults.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   if (searchLoading) {
     return (
@@ -102,10 +117,19 @@ const SearchResults = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {searchResults.map((product, idx) => (
+            {paginatedResults.map((product, idx) => (
               <ProductCard key={product.id || idx} product={product} />
             ))}
           </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
     </div>

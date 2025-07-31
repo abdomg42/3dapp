@@ -17,29 +17,57 @@ export const useCategoryStore = create((set,get) => ({
     resetForm : () => set({formData: {name:''}}),
 
 
-    addCategory: async (e) =>{
-        e.preventDefault();
-        set({loading:true, error:null});
+    addCategory: async (formData) =>{
+        set({loadingC: true, errorC: null});
         try{
-            const {formData} = get();
-            await axios.post(`${BaseUrl}/Category/createCategory`,formData);
+            await axios.post(`${BaseUrl}/Category/createCategory`, formData);
             await get().fetchCategories();
-            get().resetForm();
             toast.success("Category added successfully");
         }catch(error){
           console.log(error);
           toast.error("Something went wrong");
+        } finally {
+            set({loadingC: false});
         }
     },
+
+    updateCategory: async (id, formData) => {
+        set({loadingC: true, errorC: null});
+        try {
+            await axios.put(`${BaseUrl}/Category/updateCategory/${id}`, formData);
+            await get().fetchCategories();
+            toast.success("Category updated successfully");
+        } catch (error) {
+            console.log(error);
+            toast.error("Failed to update category");
+        } finally {
+            set({loadingC: false});
+        }
+    },
+
+    deleteCategory: async (id) => {
+        set({loadingC: true, errorC: null});
+        try {
+            await axios.delete(`${BaseUrl}/Category/deleteCategory/${id}`);
+            await get().fetchCategories();
+            toast.success("Category deleted successfully");
+        } catch (error) {
+            console.log(error);
+            toast.error("Failed to delete category");
+        } finally {
+            set({loadingC: false});
+        }
+    },
+
     fetchCategories: async () => {
-        set({loading: true, error: null});
+        set({loadingC: true, errorC: null});
         try {
             const response = await axios.get(`${BaseUrl}/Category/getCategories`);
-            set({categories: response.data, loading: false});
+            set({categories: response.data, loadingC: false});
             console.log("response",response.data);
         } catch (error) {
             console.log("error",error);
-            set({error: error.message, loading: false});
+            set({errorC: error.message, loadingC: false});
         }
     }
 }))

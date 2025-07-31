@@ -3,12 +3,15 @@ import { useParams } from 'react-router-dom';
 import { useProductStore } from '../store/ProductStore';
 import ProductCard from '../components/ProductCard';
 import FilterHeader from '../components/FilterHeader';
+import Pagination from '../components/Pagination';
 import { PackageIcon } from 'lucide-react';
 
 const CategoryFilter = () => {
   const { categoryName } = useParams();
   const { products, loading, error, fetchProductsByCategory } = useProductStore();
   const [sort, setSort] = useState('newest');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   useEffect(() => {
     if (categoryName) {
@@ -16,11 +19,23 @@ const CategoryFilter = () => {
     }
   }, [categoryName, sort, fetchProductsByCategory]);
 
+  // Reset to page 1 if products change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [products]);
+
   const decodedCategoryName = decodeURIComponent(categoryName || '');
 
   const handleSortChange = (e) => {
     setSort(e.target.value);
   };
+
+  // Calculate paginated products
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+  const paginatedProducts = products.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   if (loading) {
     return (
@@ -89,10 +104,19 @@ const CategoryFilter = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {products.map((product, idx) => (
+            {paginatedProducts.map((product, idx) => (
               <ProductCard key={product.id || idx} product={product} />
             ))}
           </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}
+          />
         )}
       </div>
     </div>

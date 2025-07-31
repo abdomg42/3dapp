@@ -2,11 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { useProductStore } from '../../store/ProductStore';
 import { useCategoryStore } from '../../store/CategoryStore';
+import { useFormatStore } from '../../store/FormatStore';
+import { useLogicielStore } from '../../store/LogicielStore';
 import { toast } from 'react-hot-toast';
 
 const ProductUpdateDialog = ({ product, isOpen, onClose, onSuccess }) => {
-  const { updateProduct, formats, logiciels, fetchFormats, fetchLogiciels } = useProductStore();
+  const { updateProduct } = useProductStore();
   const { categories, fetchCategories } = useCategoryStore();
+  const { formats, fetchFormats } = useFormatStore();
+  const { logiciels, fetchLogiciels } = useLogicielStore();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -67,11 +71,10 @@ const ProductUpdateDialog = ({ product, isOpen, onClose, onSuccess }) => {
     setLoading(true);
     try {
       await updateProduct(product.id || product.product_id, formData);
-      toast.success('Product updated successfully');
       onSuccess();
       onClose();
     } catch (error) {
-      toast.error('Failed to update product');
+      // toast.error('Failed to update product'); // Removed duplicate toast - store handles errors
     } finally {
       setLoading(false);
     }
@@ -161,6 +164,12 @@ const ProductUpdateDialog = ({ product, isOpen, onClose, onSuccess }) => {
                 onChange={handleInputChange}
                 rows={3}
                 className="w-full h-30 px-4 py-3 my-2 text-slate-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors resize-none"
+                style={{
+                  whiteSpace: 'pre-wrap',
+                  wordWrap: 'break-word',
+                  fontFamily: 'inherit'
+                }}
+                placeholder="Enter product description..."
               />
             </div>
 
@@ -177,7 +186,7 @@ const ProductUpdateDialog = ({ product, isOpen, onClose, onSuccess }) => {
                 required
               >
                 <option value="">Select Category</option>
-                {categories.map(category => (
+                {categories && categories.map(category => (
                   <option key={category.id} value={category.name}>{category.name}</option>
                 ))}
               </select>
@@ -196,7 +205,7 @@ const ProductUpdateDialog = ({ product, isOpen, onClose, onSuccess }) => {
                 required
               >
                 <option value="">Select Format</option>
-                {formats.map(format => (
+                {formats && formats.map(format => (
                   <option key={format.id} value={format.extension}>{format.extension}</option>
                 ))}
               </select>
@@ -215,7 +224,7 @@ const ProductUpdateDialog = ({ product, isOpen, onClose, onSuccess }) => {
                 required
               >
                 <option value="">Select Logiciel</option>
-                {logiciels.map(logiciel => (
+                {logiciels && logiciels.map(logiciel => (
                   <option key={logiciel.id} value={logiciel.name}>{logiciel.name}</option>
                 ))}
               </select>

@@ -41,15 +41,38 @@ export const useUserStore = create((set, get) => ({
 
 		try {
 			const res = await axios.post(`${BaseUrl}/user/createuser`, { name, email, password });
-			// set({ user: res.data, loading: false });
+			set({ loading: false });
             toast.success("User added successfully" ,{
                 duration: 4000,
                 position: 'top-center'});
 			return { success: true };
 		} catch (error) {
 			console.log(error);
+			// Always ensure loading is set to false on error
 			set({ loading: false });
-			toast.error(error.response?.data?.message || "An error occurred");
+			
+			// Handle specific error cases
+			if (error.response) {
+				const status = error.response.status;
+				const errorMessage = error.response.data?.error || 'Unknown error';
+				
+				switch (status) {
+					case 409:
+						toast.error("A user with this email already exists.");
+						break;
+					case 400:
+						toast.error("Please fill in all required fields.");
+						break;
+					case 500:
+						toast.error("Server error. Please try again later.");
+						break;
+					default:
+						toast.error(errorMessage);
+				}
+			} else {
+				toast.error("Network error. Please check your connection.");
+			}
+			
 			return { success: false };
 		}
 	},
@@ -63,12 +86,12 @@ export const useUserStore = create((set, get) => ({
 		if (!isValidEmail(email)) {
 			set({ loading: false });
 			toast.error("Please enter a valid email address");
-			return;
+			throw new Error("Invalid email");
 		}
 		if (password.length < 8) {
 			set({ loading: false });
 			toast.error("Password must be at least 8 characters");
-			return;
+			throw new Error("Password too short");
 		}
 
 		try {
@@ -76,13 +99,35 @@ export const useUserStore = create((set, get) => ({
 			console.log(res);
 			set({ user: res.data, loading: false });
             toast.success("Login successfully");
+			return { success: true, user: res.data };
 		} catch (error) {
 			console.log(error);
+			// Always ensure loading is set to false on error
 			set({ loading: false });
-			toast.error(error.response?.data?.message || "An error occurred",{
-                duration: 4000,
-                position: 'top-center'});
-
+			
+			// Handle specific error cases
+			if (error.response) {
+				const status = error.response.status;
+				const errorMessage = error.response.data?.error || 'Unknown error';
+				
+				switch (status) {
+					case 401:
+						toast.error("Invalid email or password. Please check your credentials.");
+						break;
+					case 400:
+						toast.error("Please fill in all required fields.");
+						break;
+					case 500:
+						toast.error("Server error. Please try again later.");
+						break;
+					default:
+						toast.error(errorMessage);
+				}
+			} else {
+				toast.error("Network error. Please check your connection.");
+			}
+			
+			throw error;
 		}
 	},
 
@@ -117,7 +162,16 @@ export const useUserStore = create((set, get) => ({
 				set({ user: response.data.user, checkingAuth: false });
 			}
 		} catch (error) {
+			console.log("Token refresh failed:", error);
 			set({ user: null, checkingAuth: false });
+			
+			// Show toast for refresh token failure
+			if (error.response?.status === 401) {
+				toast.error("Session expired. Please login again.");
+			} else {
+				toast.error("Authentication error. Please login again.");
+			}
+			
 			throw error;
 		}
 	},
@@ -151,7 +205,11 @@ axios.interceptors.response.use(
 				// If refresh fails, redirect to login or handle as needed
 				refreshPromise = null;
                 console.log("Refresh failed, logging out:", refreshError);
+				
+				// Clear user state and show appropriate message
 				useUserStore.getState().logout();
+				
+				// Don't show toast here as it's already handled in refreshToken
 				return Promise.reject(refreshError);
 			}
 		}
