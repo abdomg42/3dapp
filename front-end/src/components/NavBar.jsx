@@ -5,6 +5,7 @@ import logo from "../assets/Logos/logo.png"
 import Drop from "../assets/icons/Drop.png"
 import Heart from "../assets/icons/Heart.png"
 import User from "../assets/icons/User.png"
+import Dashboard from '../assets/icons/Dashboard.png';
 import { useUserStore } from '../store/UserStore';
 import Upload from "../assets/icons/Upload.png"
 import SearchBar from './SearchBar';
@@ -35,6 +36,11 @@ const NavBar = ({ onOpenSidebar, onOpenImageModal  }) => {
       {isAdmin && (
           <Link to="/admin/upload" className="cursor-pointer hover:opacity-75 transition">
             <img src={Upload} alt="Upload" className="w-10 h-10 hidden lg:block " />
+          </Link>
+        )}
+        {isAdmin && (
+          <Link to="/admin/Dashboard" className="cursor-pointer hover:opacity-75 transition">
+            <img src={Dashboard} alt="Upload" className="w-10 h-10 hidden lg:block " />
           </Link>
         )}
         <Link to="/favourites" className="cursor-pointer hover:opacity-75 transition">

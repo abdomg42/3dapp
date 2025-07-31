@@ -30,7 +30,7 @@ const Dashboard = () => {
   const [selectedLogiciel, setSelectedLogiciel] = useState(null);
 
   // User form state
-  const [userForm, setUserForm] = useState({ name: '', email: '', role: '', category: '', logiciel: '' });
+  const [UserForm, setUserForm] = useState({ name: '', email: '', password: '', role: '' });
   // Category form state
   const [categoryForm, setCategoryForm] = useState({ name: '' });
   // Logiciel form state
@@ -54,12 +54,11 @@ const Dashboard = () => {
       setUserForm({
         name: selectedUser.name || '',
         email: selectedUser.email || '',
+        password: '',
         role: selectedUser.role || '',
-        category: selectedUser.category || '',
-        logiciel: selectedUser.logiciel || '',
       });
     } else if (isUserModalOpen) {
-      setUserForm({ name: '', email: '', role: '', category: '', logiciel: '' });
+      setUserForm({ name: '', email: '', password: '', role: '' });
     }
   }, [isUserEditModalOpen, isUserModalOpen, selectedUser]);
 
@@ -83,22 +82,22 @@ const Dashboard = () => {
 
   // Handlers for User
   const handleUserFormChange = (e) => {
-    setUserForm({ ...userForm, [e.target.name]: e.target.value });
+    setUserForm({ ...UserForm, [e.target.name]: e.target.value });
   };
   const handleAddUser = async (e) => {
     e.preventDefault();
-    await addUser(userForm);
+    await addUser(UserForm);
     setIsUserModalOpen(false);
-    setUserForm({ name: '', email: '', role: '', category: '', logiciel: '' });
+    setUserForm({ name: '', email: '', password: '', role: '' });
     fetchUsers();
   };
   const handleUpdateUser = async (e) => {
     e.preventDefault();
     if (!selectedUser) return;
-    await updateUser(selectedUser.id, userForm);
+    await updateUser(selectedUser.id, UserForm);
     setIsUserEditModalOpen(false);
     setSelectedUser(null);
-    setUserForm({ name: '', email: '', role: '', category: '', logiciel: '' });
+    setUserForm({ name: '', email: '', password: '', role: '' });
     fetchUsers();
   };
   const handleDeleteUser = async () => {
@@ -229,29 +228,19 @@ const Dashboard = () => {
           <form onSubmit={handleAddUser} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
-              <input name="name" value={userForm.name} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              <input name="name" value={UserForm.name} onChange={handleUserFormChange} className="w-full text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-              <input name="email" type="email" value={userForm.email} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              <input name="email" type="email" value={UserForm.email} onChange={handleUserFormChange} className="w-full text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+              <input name="password" type="password" value={UserForm.password} onChange={handleUserFormChange} className="w-full text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
-              <input name="role" value={userForm.role} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-              <select name="category" value={userForm.category || ''} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Select Category</option>
-                {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Logiciel</label>
-              <select name="logiciel" value={userForm.logiciel || ''} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Select Logiciel</option>
-                {logiciels.map(log => <option key={log.id} value={log.name}>{log.name}</option>)}
-              </select>
+              <input name="role" value={UserForm.role} onChange={handleUserFormChange} className="w-full text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
             </div>
             <button type="submit" className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Add</button>
           </form>
@@ -264,29 +253,19 @@ const Dashboard = () => {
           <form onSubmit={handleUpdateUser} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Name *</label>
-              <input name="name" value={userForm.name} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              <input name="name" value={UserForm.name} onChange={handleUserFormChange} className="w-full text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"  />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-              <input name="email" type="email" value={userForm.email} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
+              <input name="email" type="email" value={UserForm.email} onChange={handleUserFormChange} className="w-full text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"  />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+              <input name="password" type="password" value={UserForm.password} onChange={handleUserFormChange} className="w-full text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"  />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Role *</label>
-              <input name="role" value={userForm.role} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
-              <select name="category" value={userForm.category || ''} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Select Category</option>
-                {categories.map(cat => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Logiciel</label>
-              <select name="logiciel" value={userForm.logiciel || ''} onChange={handleUserFormChange} className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">Select Logiciel</option>
-                {logiciels.map(log => <option key={log.id} value={log.name}>{log.name}</option>)}
-              </select>
+              <input name="role" value={UserForm.role} onChange={handleUserFormChange} className="w-full text-gray-700 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"  />
             </div>
             <button type="submit" className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-semibold hover:bg-blue-700 transition-colors">Update</button>
           </form>

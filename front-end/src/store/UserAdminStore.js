@@ -23,13 +23,13 @@ export const useUserAdminStore = create((set, get) => ({
   },
 
   addUser: async (UserForm) => {
+    console.log(UserForm);
     try {
-      await axios.post(`${BaseUrl}/User/CreateUser`, { UserForm });
+      const res = await axios.post(`${BaseUrl}/User/CreateUser`, UserForm );
       toast.success("User Added ");
     } catch (error) {
-      console.log("Error adding User:", error);
-      toast.error(error.response?.data?.error || "Failed to add  User");
-      throw error;
+      console.log("Error adding User:",error);
+      toast.error("Failed to add  User");
     }
   },
   updateUser: async (UserId, formData) => {
@@ -51,7 +51,7 @@ export const useUserAdminStore = create((set, get) => ({
   // Remove product from Users
   removeUser: async (UserId) => {
     try {
-      await axios.delete(`${BaseUrl}/User/deleteUser`, { UserId });
+      await axios.delete(`${BaseUrl}/User/deleteUser/${UserId}` );
       toast.success("User Removed ");
     } catch (error) {
       console.log("Error removing User:", error);

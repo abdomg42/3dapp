@@ -42,7 +42,7 @@ export const getUser = async (req, res) =>{
 
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, email, password } = req.body;
+  const { name, email, password,role } = req.body;
   try {
     const existingUser = await db.oneOrNone('SELECT * FROM users WHERE id = $1', [id]);
     if (!existingUser) {
@@ -53,8 +53,8 @@ export const updateUser = async (req, res) => {
       hashedPassword = await bcrypt.hash(password, 10);
     }
     const updatedUser = await db.oneOrNone(
-      `UPDATE users SET name = $1, email = $2, password = $3 WHERE id = $4 RETURNING *`,
-      [name ?? existingUser.name, email ?? existingUser.email, hashedPassword, id]
+      `UPDATE users SET name = $1, email = $2, password = $3, role = $4 WHERE id = $5 RETURNING *`,
+      [name ?? existingUser.name, email ?? existingUser.email, hashedPassword, role?? existingUser.role, id]
     );
     res.json(updatedUser);
   } catch (err) {
