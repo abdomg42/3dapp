@@ -33,15 +33,7 @@ app.use(cookieParser());
 // Serve static files from upload directory
 app.use('/upload', express.static(path.join(process.cwd(), 'upload/files')));
 
-app.get('/db-test', async (req, res) => {
-  try {
-    const result = await db.one('SELECT NOW() as time');
-    res.send(`Database connected! Server time: ${result.time}`);
-  } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(500).send('Database connection failed');
-  }
-});
+
 // Serve images directory
 app.use('/images', express.static(path.join(process.cwd(), 'upload/images')));
 
