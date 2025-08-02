@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon back-end/server.js",
     "build": "npm install && npm install --prefix front-end && npm run build --prefix front-end",
-    "start": "node back-end/server.js"
+    "start": "nodemon back-end/server.js && ncd front-end && npm run dev"
   },
   "keywords": [],
   "author": "",
@@ -18,7 +18,7 @@
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
-    "ioredis": "^5.6.1",
+    "ioredis": "^5.7.0",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.10",
     "pg-promise": "^11.15.0"

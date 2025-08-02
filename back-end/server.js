@@ -15,14 +15,14 @@ import LogicielRouter from "./routes/LogicielRoutes.js";
 import FavoritesRouter from "./routes/FavoritesRoutes.js";
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 dotenv.config();
 
 app.use(helmet());
 app.use(morgan('dev'));
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
 
@@ -51,6 +51,6 @@ app.use("/Category",CategoryRouter);
 app.use("/Format",FormatRouter);
 app.use("/Logiciel",LogicielRouter);
 app.use("/favorite", FavoritesRouter);
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Server is running on port ${port}`);
 });
