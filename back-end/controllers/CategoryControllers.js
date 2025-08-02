@@ -36,11 +36,12 @@ export const createCategory = async (req, res) =>{
         if (existingCategory) {
             return res.status(409).json({ error: 'A category with this name already exists.' });
         }
-        const inserted = db.oneOrNone(`
+        const inserted = await db.oneOrNone(`
         INSERT into categories(name) 
         values ($1)  
         `
         ,[name]);
+        res.status(201).json(inserted);
         }catch (error) {
         console.log('ERROR:', error);
         res.status(500).json({ error: 'Error creating Category' });

@@ -7,6 +7,7 @@ import gallery from '../assets/icons/gallery.png'
 
 const ImageSearchModal = ({ onClose }) => {
   const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
   const fileInputRef = useRef(null);
   const navigate = useNavigate();
   const { searchByImage, imageSearchLoading } = useProductSearchStore();
@@ -49,6 +50,10 @@ const ImageSearchModal = ({ onClose }) => {
       }
       
       setSelectedFile(file);
+      
+      // Create preview URL
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
     }
   };
 
@@ -72,6 +77,10 @@ const ImageSearchModal = ({ onClose }) => {
       }
       
       setSelectedFile(file);
+      
+      // Create preview URL
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
     }
   };
 
@@ -89,10 +98,8 @@ const ImageSearchModal = ({ onClose }) => {
     try {
       await searchByImage(selectedFile);
       
-      // For now, we'll navigate to search results with a special query
-      // In a real implementation, you might want to create a dedicated image search results page
-      const searchQuery = `image-search-${Date.now()}`;
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}&type=image`);
+      // Navigate to image search results
+      navigate('/image-search-results');
       
       onClose();
       
@@ -104,6 +111,10 @@ const ImageSearchModal = ({ onClose }) => {
 
   const handleRemoveFile = () => {
     setSelectedFile(null);
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+      setPreviewUrl(null);
+    }
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -142,26 +153,16 @@ const ImageSearchModal = ({ onClose }) => {
             onDrop={handleDrop}
             onDragOver={handleDragOver}
           >
-            <div className="flex flex-col items-center justify-center w-full h-full p-6 my-6">
-              <img src={gallery} className='w-12 h-12 ' />
-              <p className="mt-4 text-xl text-[#7A6B3F] font-medium text-center">Drag or Select<br />an image here</p>
-              <input
-                type="file"
-                accept="image/*"
-                ref={fileInputRef}
-                style={{ display: 'none' }}
-                onChange={handleFileChange}
-              />
-              <button
-                type="button"
-                className="cursor-pointer mt-6 mb-4 px-8 py-3 rounded-full bg-[#7d8cff] text-white text-lg font-semibold shadow hover:bg-[#5c6bc0] transition-colors duration-200"
-                onClick={() => fileInputRef.current && fileInputRef.current.click()}
-              >
-                {selectedFile ? 'Change Image' : 'Upload Image'}
-              </button>
-              {selectedFile && (
-                <div className="mt-2 text-[#7A6B3F] font-medium text-center">
-                  <p>Selected: {selectedFile.name}</p>
+            {previewUrl ? (
+              // Show image preview
+              <div className="flex flex-col items-center justify-center w-full h-full p-6">
+                <img 
+                  src={previewUrl} 
+                  alt="Preview" 
+                  className="max-w-full max-h-48 object-contain rounded-lg shadow-sm"
+                />
+                <div className="mt-4 text-center">
+                  <p className="text-[#7A6B3F] font-medium">{selectedFile.name}</p>
                   <p className="text-sm text-gray-500">Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                   <button
                     type="button"
@@ -171,8 +172,28 @@ const ImageSearchModal = ({ onClose }) => {
                     Remove
                   </button>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              // Show upload area
+              <div className="flex flex-col items-center justify-center w-full h-full p-6 my-6">
+                <img src={gallery} className='w-12 h-12 ' />
+                <p className="mt-4 text-xl text-[#7A6B3F] font-medium text-center">Drag or Select<br />an image here</p>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleFileChange}
+                />
+                <button
+                  type="button"
+                  className="cursor-pointer mt-6 mb-4 px-8 py-3 rounded-full bg-[#7d8cff] text-white text-lg font-semibold shadow hover:bg-[#5c6bc0] transition-colors duration-200"
+                  onClick={() => fileInputRef.current && fileInputRef.current.click()}
+                >
+                  Upload Image
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Search Button */}
@@ -184,10 +205,17 @@ const ImageSearchModal = ({ onClose }) => {
                 disabled={imageSearchLoading}
                 className="cursor-pointer px-8 py-3 rounded-full bg-green-600 text-white text-lg font-semibold shadow hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
-                {imageSearchLoading ? 'Searching...' : 'Search by Image'}
+                {imageSearchLoading ? (
+                  <div className="flex items-center justify-center">
+                    <div className="loading loading-spinner loading-sm mr-2"></div>
+                    Searching...
+                  </div>
+                ) : (
+                  'Search by Image'
+                )}
               </button>
               <p className="mt-2 text-sm text-gray-600">
-                Find similar products based on this image
+                Find similar products based on this image using AI
               </p>
             </div>
           )}

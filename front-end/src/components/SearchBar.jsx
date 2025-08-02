@@ -76,11 +76,31 @@ const SearchBar = ({ onOpenImageModal }) => {
     }
   };
 
-  const getHighlightedText = (text, query) => {
-    if (!query) return text;
-    const regex = new RegExp(`(${query})`, 'gi');
-    return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
-  };
+const getHighlightedName = (text, query) => {
+  if (!query) return text;
+
+  const escapedQuery = query.replace(/[-[\]/{}()*+?.\\^$|]/g, '\\$&'); // escape special regex characters
+  const regex = new RegExp(`(${escapedQuery})`, 'gi');
+
+  return text.replace(regex, '<mark style="background-color: #FEF08A;">$1</mark>');
+};
+
+const getHighlightedText = (text, query) => {
+  if (!query) return text;
+
+  const parts = text.split(new RegExp(`(${query})`, 'gi'));
+  return parts.map((part, index) =>
+    part.toLowerCase() === query.toLowerCase() ? (
+      <mark key={index} className="bg-yellow-200">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+};
+
+
 
   return (
     <div className="flex-1 mx-2 max-w-xl lg:flex relative" ref={searchRef}>
@@ -129,7 +149,7 @@ const SearchBar = ({ onOpenImageModal }) => {
                     <div
                       className="font-medium text-gray-900"
                       dangerouslySetInnerHTML={{
-                        __html: getHighlightedText(product.name, query),
+                        __html: getHighlightedName(product.name, query),
                       }}
                     />
                     <div className="text-sm text-gray-500">

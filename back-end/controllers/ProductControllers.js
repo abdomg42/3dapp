@@ -1,4 +1,7 @@
 import db from "../config/db.js";
+import EmbeddingService from '../services/EmbeddingService.js';
+import path from 'path';
+import fs from 'fs';
 
 export const getAllProducts = async (req, res) =>{
     try {
@@ -30,6 +33,34 @@ export const getProduct = async (req, res) =>{
     }
 };  
 
+// Helper function to find the correct image path
+const findImagePath = (filename) => {
+  const possiblePaths = [
+    path.join(process.cwd(), 'upload', filename),
+    path.join(process.cwd(), 'upload', 'images', filename),
+    path.join(process.cwd(), 'upload', 'images', filename.replace('image-', '')),
+    path.join(process.cwd(), 'upload', 'images', filename.replace('/', ''))
+  ];
+  
+  for (const possiblePath of possiblePaths) {
+    if (fs.existsSync(possiblePath)) {
+      return possiblePath;
+    }
+  }
+  
+  // If still not found, try to find by filename in images directory
+  const imagesDir = path.join(process.cwd(), 'upload', 'images');
+  if (fs.existsSync(imagesDir)) {
+    const files = fs.readdirSync(imagesDir);
+    const matchingFile = files.find(file => file.includes(filename.replace('image-', '')));
+    if (matchingFile) {
+      return path.join(imagesDir, matchingFile);
+    }
+  }
+  
+  return null;
+};
+
 export const createProduct = async (req, res) =>{
   const { name, description, category, format, logiciel } = req.body;
   
@@ -47,15 +78,21 @@ export const createProduct = async (req, res) =>{
   }
 
   try {
+    console.log('🔄 Starting product creation...');
+    
     // Check for duplicate product name
     const existingProduct = await db.oneOrNone('SELECT * FROM products WHERE name = $1', [name]);
     if (existingProduct) {
       return res.status(409).json({ error: 'A product with this name already exists.' });
     }
 
+    console.log('✅ Duplicate check passed');
+
     // Get file paths
     const imagePath = `/${req.files.image[0].filename}`;
     const filePath = `/${req.files.file[0].filename}`;
+
+    console.log('🔄 Processing categories, formats, and logiciels...');
 
     let id_category;
     if(category){
@@ -103,6 +140,8 @@ export const createProduct = async (req, res) =>{
       id_logiciel = result.id;
     }
 
+    console.log('✅ Database records created');
+
     // Create image record
     const imageResult = await db.one(`
       INSERT INTO images(path)
@@ -111,6 +150,7 @@ export const createProduct = async (req, res) =>{
     `, [imagePath]);
     const id_image = imageResult.id;
 
+    // Create product record
     const newProduct = await db.one(`
       INSERT INTO products
         (name, description, fichier_path, id_category, id_format, id_image, id_logiciel)
@@ -119,7 +159,29 @@ export const createProduct = async (req, res) =>{
       RETURNING *;
     `, [name, description, filePath, id_category, id_format, id_image, id_logiciel]);
 
-    res.status(201).json(newProduct);
+    console.log('✅ Product created in database');
+
+    // Return success immediately
+    res.status(201).json({
+      ...newProduct,
+      message: 'Product created successfully. FAISS embedding will be generated in the background.',
+      embedding_status: 'pending'
+    });
+
+    // Generate FAISS embedding asynchronously (non-blocking)
+    const fullImagePath = findImagePath(req.files.image[0].filename);
+    if (fullImagePath) {
+      // Use setImmediate to run this after the response is sent
+      setImmediate(async () => {
+        try {
+          console.log(`🔄 Generating FAISS embedding for image ${id_image} in background...`);
+          await EmbeddingService.addEmbedding(fullImagePath, id_image);
+          console.log(`✅ Added MobileNet embedding to FAISS index for image ${id_image}`);
+        } catch (error) {
+          console.error(`❌ Error adding to FAISS index for image ${id_image}:`, error);
+        }
+      });
+    }
 
   } catch (error) {
     console.error('Error creating product:', error);
@@ -131,6 +193,7 @@ export const updateProduct = async (req, res) =>{
   const { id } = req.params;
   console.log(req.body)
   const { name, description, category, format, logiciel } = req.body;
+
   try {
     
     const existingProduct = await db.oneOrNone('SELECT * FROM products WHERE id = $1', [id]);
@@ -195,7 +258,7 @@ export const updateProduct = async (req, res) =>{
 
     // Step 3: Update only the changed fields
     const updatedProduct = await db.oneOrNone(`
-      UPDATE products
+      UPDATE products 
       SET name = $1,
           description = $2,
           id_category = $3,
@@ -219,8 +282,8 @@ export const updateProduct = async (req, res) =>{
 }  
 
 export const deleteProduct = async (req, res) =>{
-    const { id } = req.params;
-    try {
+  const { id } = req.params;
+  try {
           const result = await db.result(`
             DELETE 
             FROM products 
@@ -245,11 +308,11 @@ export const searchProducts = async (req, res) => {
     const searchTerm = `%${q.trim()}%`;
     const products = await db.any(`
       SELECT DISTINCT p.*, c.name as category_name, f.extension as format_extension, l.name as logiciel_name ,i.path as path
-      FROM products p
-      LEFT JOIN categories c ON p.id_category = c.id
-      LEFT JOIN formats f ON p.id_format = f.id
-      LEFT JOIN logiciels l ON p.id_logiciel = l.id
-      LEFT JOIN images i ON p.id_image = i.id
+        FROM products p
+        LEFT JOIN categories c ON p.id_category = c.id
+        LEFT JOIN formats f ON p.id_format = f.id
+        LEFT JOIN logiciels l ON p.id_logiciel = l.id
+        LEFT JOIN images i ON p.id_image = i.id
       WHERE p.name ILIKE $1
          OR c.name ILIKE $1
          OR f.extension ILIKE $1
@@ -261,5 +324,79 @@ export const searchProducts = async (req, res) => {
   } catch (error) {
     console.log('Error searching products:', error);
     res.status(500).json({ error: 'Error searching products' });
+  }
+};
+
+// Search products by image similarity using FAISS
+export const searchByImage = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'Image file is required' });
+  }
+
+  try {
+    const uploadedImage = req.file;
+    const fullImagePath = findImagePath(uploadedImage.filename);
+    
+    if (!fullImagePath) {
+      return res.status(400).json({ error: 'Uploaded image file not found' });
+    }
+
+    console.log(`🔍 Searching FAISS index for similar images to: ${uploadedImage.filename}`);
+    
+    // Search FAISS index
+    const similarResults = await EmbeddingService.searchSimilar(fullImagePath, 15);
+
+    console.log(`✅ Found ${similarResults.length} similar images in FAISS index`);
+
+    // Get product details for similar images
+    const productsWithSimilarity = [];
+    for (const result of similarResults) {
+      const product = await db.oneOrNone(`
+        SELECT p.*, c.name as category_name, f.extension as format_extension, 
+               l.name as logiciel_name, i.path as path
+        FROM products p
+        LEFT JOIN categories c ON p.id_category = c.id
+        LEFT JOIN formats f ON p.id_format = f.id
+        LEFT JOIN logiciels l ON p.id_logiciel = l.id
+        LEFT JOIN images i ON p.id_image = i.id
+        WHERE i.id = $1
+      `, [result.image_id]);
+      
+      if (product) {
+        productsWithSimilarity.push({
+          ...product,
+          id: product.product_id,
+          similarity_score: result.similarity
+        });
+      }
+    }
+
+    console.log(`✅ Found ${productsWithSimilarity.length} similar products`);
+
+    // Clean up uploaded file immediately after search
+    fs.unlink(fullImagePath, (err) => {
+      if (err) console.error('Error deleting uploaded file:', err);
+      else console.log('✅ Search image deleted successfully');
+    });
+    
+    res.json({
+      message: 'FAISS image search completed successfully',
+      results: productsWithSimilarity,
+      uploadedImage: {
+        filename: uploadedImage.filename,
+        mimetype: uploadedImage.mimetype,
+        size: uploadedImage.size
+      },
+      searchStats: {
+        found_products: similarResults.length,
+        similar_products: productsWithSimilarity.length,
+        min_similarity: productsWithSimilarity.length > 0 ? Math.min(...productsWithSimilarity.map(p => p.similarity_score)) : 0,
+        max_similarity: productsWithSimilarity.length > 0 ? Math.max(...productsWithSimilarity.map(p => p.similarity_score)) : 0
+      }
+    });
+    
+  } catch (error) {
+    console.error('FAISS image search error:', error);
+    res.status(500).json({ error: 'Error processing FAISS image search' });
   }
 };  

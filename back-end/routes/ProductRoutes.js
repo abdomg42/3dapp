@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import {getAllProducts, getProduct, createProduct, updateProduct, deleteProduct, searchProducts} from "../controllers/ProductControllers.js"
+import {getAllProducts, getProduct, createProduct, updateProduct, deleteProduct, searchProducts, searchByImage} from "../controllers/ProductControllers.js"
 import {getProductsByCategory, getProductsByFormat, getProductsByLogiciel, getProductsWithSort} from "../controllers/ProductFilterControllers.js"
 import { uploadProduct } from "../middleware/upload.js";
 
@@ -17,6 +17,8 @@ routerProduct.post("/createProduct", uploadProduct.fields([
   { name: 'image', maxCount: 1 },
   { name: 'file', maxCount: 1 }
 ]), createProduct);
+
+routerProduct.post("/search-by-image", uploadProduct.single('image'), searchByImage);
 
 routerProduct.put("/updateProduct/:id",updateProduct);
 routerProduct.delete("/deleteProduct/:id",deleteProduct);

@@ -4,11 +4,13 @@ import { toast } from 'react-hot-toast';
 
 const BaseUrl = "http://localhost:3000";
 
-export const useProductSearchStore = create((set) => ({
+export const useProductSearchStore = create((set, get) => ({
     searchResults: [],
     searchLoading: false,
     imageSearchResults: [],
     imageSearchLoading: false,
+    imageSearchStats: null,
+    uploadedImageInfo: null,
 
     searchProducts: async (query) => {
         if (!query || query.trim() === '') {
@@ -45,20 +47,42 @@ export const useProductSearchStore = create((set) => ({
           });
 
           console.log('Image search response:', response.data);
+          console.log('Results length:', response.data.results?.length);
+          console.log('Search stats:', response.data.searchStats);
           
-          // Store the image search results
+          // Store the image search results with similarity scores
           set({ 
             imageSearchResults: response.data.results || [], 
-            imageSearchLoading: false 
+            imageSearchLoading: false,
+            imageSearchStats: response.data.searchStats || null,
+            uploadedImageInfo: response.data.uploadedImage || null
           });
 
-          toast.success('Image search completed!');
+          const resultCount = response.data.results?.length || 0;
+          if (resultCount > 0) {
+            toast.success(`Found ${resultCount} similar products!`);
+          } else {
+            toast('No similar products found. Try a different image.', {
+              icon: '🔍',
+              style: {
+                borderRadius: '10px',
+                background: '#333',
+                color: '#fff',
+              },
+            });
+          }
+          
           return response.data;
           
         } catch (error) {
           console.error('Image search error:', error);
           toast.error('Failed to process image search. Please try again.');
-          set({ imageSearchResults: [], imageSearchLoading: false });
+          set({ 
+            imageSearchResults: [], 
+            imageSearchLoading: false,
+            imageSearchStats: null,
+            uploadedImageInfo: null
+          });
           throw error;
         }
     },
@@ -68,7 +92,12 @@ export const useProductSearchStore = create((set) => ({
     },
 
     clearImageSearchResults: () => {
-        set({ imageSearchResults: [], imageSearchLoading: false });
+        set({ 
+          imageSearchResults: [], 
+          imageSearchLoading: false,
+          imageSearchStats: null,
+          uploadedImageInfo: null
+        });
     },
 
     // Function to search products for the search results page

@@ -20,6 +20,7 @@ import LogicielFilter from './Pages/LogicielFilter';
 import SearchResults from './Pages/SearchResults';
 import { useUserStore } from './store/UserStore';
 import ImageSearchModal from './components/ImageSearchModal';
+import ImageSearchResults from './Pages/ImageSearchResults';
 
 const App = () => {
 
@@ -90,6 +91,7 @@ const [showImageModal, setShowImageModal] = useState(false);
             <Route path="/format/:formatName" element={<FormatFilter />} />
             <Route path="/logiciel/:logicielName" element={<LogicielFilter />} />
             <Route path="/search" element={<SearchResults />} />
+            <Route path="/image-search-results" element={<ImageSearchResults />} />
           </>
         )}
         

@@ -6,7 +6,6 @@ import { useCategoryStore } from '../../store/CategoryStore';
 import { useFormatStore } from '../../store/FormatStore';
 import { useLogicielStore } from '../../store/LogicielStore';
 
-
 const UploadPage = () => {
   // Move hooks inside the component
   const { categories, loadingC, errorC, fetchCategories } = useCategoryStore();
@@ -67,6 +66,7 @@ const handleImageDrop = (e) => {
         return;
       }
       setImageFile(file);
+      toast.success('Image selected successfully');
     }
   };
 
