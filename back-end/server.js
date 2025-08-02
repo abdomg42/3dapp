@@ -33,7 +33,9 @@ app.use(cookieParser());
 // Serve static files from upload directory
 app.use('/upload', express.static(path.join(process.cwd(), 'upload/files')));
 
-
+app.get('/db-test', (req, res) => {
+  res.status(200).send('OK');
+});
 // Serve images directory
 app.use('/images', express.static(path.join(process.cwd(), 'upload/images')));
 
