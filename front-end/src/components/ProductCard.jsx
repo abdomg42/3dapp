@@ -79,7 +79,6 @@ const ProductCard = ({ product }) => {
       toast.promise("Download started!");
     } catch (error) {
       console.error('Download error:', error);
-      toast.error("Failed to download file");
     }
   };
 

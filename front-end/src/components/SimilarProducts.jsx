@@ -31,10 +31,10 @@ const SimilarProducts = ({ currentProduct, productsPerPage = 5 }) => {
      
       // Filter products with the same category as current product
       const filtered = products.filter(product => {
-        const isSameCategory = product.category_name === currentProduct.category_name;
+        const isSameCategory = product.category === currentProduct.category;
         const isNotSameProduct = product.product_id !== currentProduct.product_id;
         
-        console.log(`Product ${product.name}: category=${product.category_name}, same=${isSameCategory}, notSame=${isNotSameProduct}`);
+        console.log(`Product ${product.name}: category=${product.category}, same=${isSameCategory}, notSame=${isNotSameProduct}`);
         
         return isSameCategory && isNotSameProduct;
       });

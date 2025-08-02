@@ -52,13 +52,15 @@ export const useProductSearchStore = create((set, get) => ({
           
           // Store the image search results with similarity scores
           set({ 
-            imageSearchResults: response.data.results || [], 
+            imageSearchResults: Array.isArray(response.data) ? response.data : (response.data.results || []) , 
             imageSearchLoading: false,
             imageSearchStats: response.data.searchStats || null,
             uploadedImageInfo: response.data.uploadedImage || null
           });
 
-          const resultCount = response.data.results?.length || 0;
+          const resultCount = Array.isArray(response.data)
+              ? response.data.length
+              : (response.data.results?.length || 0);
           if (resultCount > 0) {
             toast.success(`Found ${resultCount} similar products!`);
           } else {
@@ -83,7 +85,6 @@ export const useProductSearchStore = create((set, get) => ({
             imageSearchStats: null,
             uploadedImageInfo: null
           });
-          throw error;
         }
     },
 
