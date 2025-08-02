@@ -36,7 +36,7 @@ CREATE TABLE Products(
     telechargements INT DEFAULT 0
 );
 
-CREATE TABLE favorite (
+CREATE TABLE favorites (
   user_id INT REFERENCES users(id) ON DELETE CASCADE,
   product_id INT REFERENCES Products(id) ON DELETE CASCADE,
   date_created TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -60,7 +60,8 @@ SELECT
 
         l.name as logiciel
 
-FROM	products p
+FROM 
+        products p
         LEFT JOIN categories c ON p.id_category  = c.id
         LEFT JOIN formats f ON p.id_format = f.id
         LEFT JOIN images i ON p.id_image = i.id
