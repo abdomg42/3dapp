@@ -37,10 +37,10 @@ export const redis = new Redis(redisUrl, {
   },
 });
 
-redis.on('connect', () => console.log('[Redis] Connected to Upstash'));
-redis.on('ready', () => console.log('[Redis] Ready'));
-redis.on('error', (err) => console.error('[Redis] Error', err));
-redis.on('close', () => console.warn('[Redis] Connection closed'));
-redis.on('reconnecting', () => console.log('[Redis] Reconnecting...'));
+  redis.on('connect', () => console.log('[Redis] Connected successfully'));
+  redis.on('ready', () => console.log('[Redis] Ready'));
+  redis.on('error', (err) => console.error('[Redis] Error', err));
+  redis.on('close', () => console.warn('[Redis] Connection closed'));
+  redis.on('reconnecting', () => console.log('[Redis] Reconnecting...'));
 
 // await redis.set("foo","bar")
