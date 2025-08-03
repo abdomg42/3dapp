@@ -5,8 +5,8 @@
   "main": "back-end/server.js",
   "scripts": {
     "dev": "nodemon back-end/server.js",
-    "build": "npm install && npm install --prefix front-end && npm run build --prefix front-end",
-    "start": "nodemon back-end/server.js && ncd front-end && npm run dev"
+    "build": "npm install && npm install --prefix front-end && npm run build --prefix front-end && cd back-end && pip install -r requirements.txt",
+    "start": "concurrently \"nodemon back-end/server.js\" \"npm run dev --prefix front-end\""
   },
   "keywords": [],
   "author": "",
@@ -15,6 +15,7 @@
   "devDependencies": {
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
+    "concurrently": "^9.2.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
@@ -29,5 +30,8 @@
     "helmet": "^8.1.0",
     "morgan": "^1.10.1",
     "multer": "^2.0.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

@@ -3,7 +3,7 @@ import { spawn } from 'child_process';
 
 class EmbeddingService {
   constructor() {
-    this.pythonScript = path.join(process.cwd(), 'mobilenet_faiss.py');
+    this.pythonScript = path.join(process.cwd(),'back-end', 'mobilenet_faiss.py');
   }
 
   async executePythonScript(action, imagePath, imageId = null, topK = 15) {
