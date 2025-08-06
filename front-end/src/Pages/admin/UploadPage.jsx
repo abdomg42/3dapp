@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { useProductStore } from '../../store/ProductStore';
 import { toast } from 'react-hot-toast';
-import { X } from 'lucide-react';
 import { useCategoryStore } from '../../store/CategoryStore';
 import { useFormatStore } from '../../store/FormatStore';
 import { useLogicielStore } from '../../store/LogicielStore';
+import ModelFilesUpload from './ModelFilesUpload';
+import TextureFilesUpload from './TextureFilesUpload';
+import ImageUpload from './ImageUpload';
 
 const UploadPage = () => {
-  // Move hooks inside the component
-  const { categories, loadingC, errorC, fetchCategories } = useCategoryStore();
+  const { categories, fetchCategories } = useCategoryStore();
   const { formats, fetchFormats } = useFormatStore();
   const { logiciels, fetchLogiciels } = useLogicielStore();
 
@@ -18,19 +19,6 @@ const UploadPage = () => {
     fetchLogiciels();
   }, [fetchCategories, fetchFormats, fetchLogiciels]);
 
-
-  const handleModelDrop = (e) => {
-  e.preventDefault();
-  const droppedFile = e.dataTransfer.files[0];
-  if (droppedFile) handleModelFileChange({ target: { files: [droppedFile] } });
-};
-
-const handleImageDrop = (e) => {
-  e.preventDefault();
-  const droppedFile = e.dataTransfer.files[0];
-  if (droppedFile) handleImageChange({ target: { files: [droppedFile] } });
-};
-
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -39,7 +27,8 @@ const handleImageDrop = (e) => {
     logiciel: ''
   });
   const [imageFile, setImageFile] = useState(null);
-  const [modelFile, setModelFile] = useState(null);
+  const [modelFiles, setModelFiles] = useState([]);
+  const [textureFiles, setTextureFiles] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const { addProduct } = useProductStore();
@@ -52,88 +41,36 @@ const handleImageDrop = (e) => {
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate image file
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-      if (!allowedTypes.includes(file.type)) {
-        toast.error('Please select a valid image file (JPEG, PNG, GIF, WebP)');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast.error('Image file size must be less than 5MB');
-        return;
-      }
-      setImageFile(file);
-      toast.success('Image selected successfully');
-    }
-  };
-
-  const handleRemoveImage = () => {
-    setImageFile(null);
-  };
-
-  const handleModelFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      // Validate 3D model file
-      const allowedExtensions = ['.3ds', '.zip', '.rar', '.obj', '.fbx', '.dae', '.blend', '.max', '.ma', '.mb', '.stl', '.ply', '.wrl', '.vrml', '.3dm', '.skp', '.dwg', '.dxf', '.iges', '.step', '.stp'];
-      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
-      
-      if (!allowedExtensions.includes(fileExtension)) {
-        toast.error('Please select a valid 3D model file');
-        return;
-      }
-      if (file.size > 100 * 1024 * 1024) { // 100MB limit
-        toast.error('Model file size must be less than 100MB');
-        return;
-      }
-      setModelFile(file);
-    }
-  };
-
-  const handleRemoveModel = () => {
-    setModelFile(null);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!formData.name || !formData.category || !formData.format || !formData.logiciel) {
       toast.error('Please fill in all required fields');
       return;
     }
-
     if (!imageFile) {
       toast.error('Please select an image file');
       return;
     }
-
-    if (!modelFile) {
-      toast.error('Please select a model file');
+    if (modelFiles.length === 0) {
+      toast.error('Please select at least one model file');
       return;
     }
-
     setLoading(true);
-
     try {
       const submitFormData = new FormData();
-      
-      // Add text fields
       submitFormData.append('name', formData.name);
       submitFormData.append('description', formData.description);
       submitFormData.append('category', formData.category);
       submitFormData.append('format', formData.format);
       submitFormData.append('logiciel', formData.logiciel);
-      
-      // Add files
       submitFormData.append('image', imageFile);
-      submitFormData.append('file', modelFile);
-
+      modelFiles.forEach(file => {
+        submitFormData.append('modelFiles', file);
+      });
+      textureFiles.forEach(file => {
+        submitFormData.append('textureFiles', file);
+      });
       await addProduct(submitFormData);
-      
-      // Reset form
       setFormData({
         name: '',
         description: '',
@@ -142,8 +79,8 @@ const handleImageDrop = (e) => {
         logiciel: ''
       });
       setImageFile(null);
-      setModelFile(null);
-      
+      setModelFiles([]);
+      setTextureFiles([]);
     } catch (error) {
       console.error('Upload error:', error);
       toast.error('Failed to upload product');
@@ -161,13 +98,13 @@ const handleImageDrop = (e) => {
       logiciel: ''
     });
     setImageFile(null);
-    setModelFile(null);
+    setModelFiles([]);
+    setTextureFiles([]);
   };
 
   return (
     <div className="max-w-2xl mx-auto mt-8 pb-10 font-[Poppins]" style={{ fontFamily: "'Poppins', sans-serif" }}>
       <h1 className="text-3xl font-bold text-[#333] mb-8 text-center">Upload New Product</h1>
-      
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Product Name */}
         <div>
@@ -182,7 +119,6 @@ const handleImageDrop = (e) => {
             required
           />
         </div>
-
         {/* Category and Format */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -194,15 +130,14 @@ const handleImageDrop = (e) => {
               className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-            <option value="">Select Category</option>
-            {categories && categories.map(cat => (
-              <option key={cat.id} value={cat.name }>
-                {cat.name || cat}
-              </option>
-            ))}
+              <option value="">Select Category</option>
+              {categories && categories.map(cat => (
+                <option key={cat.id} value={cat.name }>
+                  {cat.name || cat}
+                </option>
+              ))}
             </select>
           </div>
-          
           <div>
             <label className="block mb-2 text-[#333] font-medium">Format *</label>
             <select
@@ -212,16 +147,15 @@ const handleImageDrop = (e) => {
               className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             >
-            <option value="">Select Format</option>
-            {formats && formats.map(fmt => (
-              <option key={fmt.id} value={fmt.extension }>
-                {fmt.extension }
-              </option>
-            ))}
+              <option value="">Select Format</option>
+              {formats && formats.map(fmt => (
+                <option key={fmt.id} value={fmt.extension }>
+                  {fmt.extension }
+                </option>
+              ))}
             </select>
           </div>
         </div>
-
         {/* Software */}
         <div>
           <label className="block mb-2 text-[#333] font-medium">Logiciel *</label>
@@ -240,90 +174,12 @@ const handleImageDrop = (e) => {
             ))}
           </select>
         </div>
-
-        {/* Model File Upload */}
-        <div>
-          <label className="block mb-2 text-[#333] font-medium">3D Model File *</label>
-          {modelFile ? (
-            <div className="flex items-center gap-4 border-2 border-dashed border-blue-400 rounded-lg p-4 bg-blue-50">
-              <div className="text-3xl">📦</div>
-              <div className="flex-1">
-                <div className="font-medium text-blue-700">{modelFile.name}</div>
-                <div className="text-xs text-gray-500">{(modelFile.size / 1024 / 1024).toFixed(2)} MB</div>
-              </div>
-              <button type="button" onClick={handleRemoveModel} className="p-1 rounded-full hover:bg-blue-200">
-                <X size={20} />
-              </button>
-            </div>
-          ) : (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors"
-              onDrop={handleModelDrop}
-              onDragOver={(e) => e.preventDefault()}
-            >
-              <input
-                type="file"
-                onChange={handleModelFileChange}
-                accept=".3ds,.obj,.fbx,.zip,.rar,.dae,.blend,.max,.ma,.mb,.stl,.ply,.wrl,.vrml,.3dm,.skp,.dwg,.dxf,.iges,.step,.stp"
-                className="hidden"
-                id="model-file"
-              />
-              <label htmlFor="model-file" className="cursor-pointer">
-                <p className="text-gray-600">
-                  Drag or Click to select 3D model file
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Supported formats: 3DS, OBJ, FBX, DAE, BLEND, MAX, MA, MB, STL, PLY, WRL, VRML, 3DM, SKP, DWG, DXF, IGES, STEP, STP
-                </p>
-                <p className="text-sm text-gray-500">Max size: 100MB</p>
-              </label>
-            </div>
-          )}
-        </div>
-
+        {/* Model Files Upload */}
+        <ModelFilesUpload modelFiles={modelFiles} setModelFiles={setModelFiles} />
+        {/* Texture Files Upload */}
+        <TextureFilesUpload textureFiles={textureFiles} setTextureFiles={setTextureFiles} />
         {/* Image Upload */}
-        <div>
-          <label className="block mb-2 text-[#333] font-medium">Product Image *</label>
-          {imageFile ? (
-            <div className="flex items-center gap-4 border-2 border-dashed border-green-400 rounded-lg p-4 bg-green-50">
-              <img
-                src={URL.createObjectURL(imageFile)}
-                alt="Preview"
-                className="w-20 h-20 object-contain rounded-lg border"
-              />
-              <div className="flex-1">
-                <div className="font-medium text-green-700">{imageFile.name}</div>
-                <div className="text-xs text-gray-500">{(imageFile.size / 1024).toFixed(1)} KB</div>
-              </div>
-              <button type="button" onClick={handleRemoveImage} className="p-1 rounded-full hover:bg-green-200">
-                <X size={20} />
-              </button>
-            </div>
-          ) : (
-            <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-500 transition-colors"
-              onDrop={handleImageDrop}
-              onDragOver={(e) => e.preventDefault()} >
-              <input
-                type="file"
-                onChange={handleImageChange}
-                accept="image/*"
-                className="hidden"
-                id="image-file"
-              />
-              <label htmlFor="image-file" className="cursor-pointer">
-                <div className="text-4xl mb-2">🖼️</div>
-                <p className="text-gray-600">
-                  Drag or Click to select product image
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Supported formats: JPEG, PNG, GIF, WebP
-                </p>
-                <p className="text-sm text-gray-500">Max size: 5MB</p>
-              </label>
-            </div>
-          )}
-        </div>
-
+        <ImageUpload imageFile={imageFile} setImageFile={setImageFile} />
         {/* Description */}
         <div>
           <label className="block mb-2 text-[#333] font-medium">Description</label>
@@ -334,14 +190,7 @@ const handleImageDrop = (e) => {
             className="w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-black min-h-[120px] focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter product description..."
           />
-          <button
-            type="button"
-            className="border-2 border-purple-600 bg-white text-purple-500 rounded-lg px-4 py-1.5 ml-2 font-bold shadow-md shadow-purple-300/20 cursor-pointer hover:bg-purple-50 hover:shadow-lg hover:-translate-y-0.5 transition duration-200 ease-in-out"
-          >
-            ✨ Generate
-          </button>
         </div>
-
         {/* Action Buttons */}
         <div className="flex gap-4 pt-4">
           <button

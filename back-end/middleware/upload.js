@@ -65,6 +65,19 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+// File filter for texture files
+const textureFilter = (req, file, cb) => {
+  const allowedTypes = /jpg|jpeg|png|bmp|tga|tiff|psd|dds|ktx|pvr|hdr|exr/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = allowedTypes.test(file.mimetype);
+
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error('Only texture files are allowed!'), false);
+  }
+};
+
 // Create multer instances
 export const uploadImage = multer({
   storage: imageStorage,
@@ -82,27 +95,36 @@ export const uploadFile = multer({
   }
 });
 
-// Combined upload for both image and file
+// Combined upload for image, multiple model files, and multiple texture files
 export const uploadProduct = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
       if (file.fieldname === 'image') {
         cb(null, imagesDir);
-      } else if (file.fieldname === 'file') {
-        cb(null, filesDir);
+      } else if (file.fieldname === 'modelFiles' || file.fieldname === 'textureFiles') {
+        cb(null, filesDir); // Store all files in files directory
       }
     },
     filename: (req, file, cb) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const prefix = file.fieldname === 'image' ? 'image-' : 'file-';
+      let prefix;
+      if (file.fieldname === 'image') {
+        prefix = 'image-';
+      } else if (file.fieldname === 'modelFiles') {
+        prefix = 'model-';
+      } else if (file.fieldname === 'textureFiles') {
+        prefix = 'texture-';
+      }
       cb(null, prefix + uniqueSuffix + path.extname(file.originalname));
     }
   }),
   fileFilter: (req, file, cb) => {
     if (file.fieldname === 'image') {
       return imageFilter(req, file, cb);
-    } else if (file.fieldname === 'file') {
+    } else if (file.fieldname === 'modelFiles') {
       return fileFilter(req, file, cb);
+    } else if (file.fieldname === 'textureFiles') {
+      return textureFilter(req, file, cb);
     }
     cb(new Error('Invalid field name'), false);
   },

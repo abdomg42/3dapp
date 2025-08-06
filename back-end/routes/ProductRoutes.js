@@ -15,7 +15,8 @@ routerProduct.get("/logiciel/:logicielName", getProductsByLogiciel);
 
 routerProduct.post("/createProduct", uploadProduct.fields([
   { name: 'image', maxCount: 1 },
-  { name: 'file', maxCount: 1 }
+  { name: 'modelFiles', maxCount: 10 },
+  { name: 'textureFiles', maxCount: 10 }
 ]), createProduct);
 
 routerProduct.post("/search-by-image", uploadProduct.single('image'), searchByImage);

@@ -1,5 +1,6 @@
 import db from "../config/db.js";
 import EmbeddingService from '../services/EmbeddingService.js';
+import CompressionService from '../services/CompressionService.js';
 import path from 'path';
 import fs from 'fs';
 
@@ -64,10 +65,10 @@ const findImagePath = (filename) => {
 export const createProduct = async (req, res) =>{
   const { name, description, category, format, logiciel } = req.body;
   
-  // Check if files were uploaded
-  if (!req.files || !req.files.image || !req.files.file) {
+  // Check if required files were uploaded
+  if (!req.files || !req.files.image || !req.files.modelFiles || req.files.modelFiles.length === 0) {
     return res.status(400).json({
-      error: 'Both image and file are required.'
+      error: 'Both image and at least one model file are required.'
     });
   }
 
@@ -90,7 +91,40 @@ export const createProduct = async (req, res) =>{
 
     // Get file paths
     const imagePath = `/${req.files.image[0].filename}`;
-    const filePath = `/${req.files.file[0].filename}`;
+    let filePath;
+    let filesToCleanup = [];
+
+    // Get all uploaded files
+    const modelFiles = req.files.modelFiles || [];
+    const textureFiles = req.files.textureFiles || [];
+    
+    console.log(`📁 Processing ${modelFiles.length} model files and ${textureFiles.length} texture files`);
+
+    // Add full paths to files for compression
+    const modelFilesWithPaths = modelFiles.map(file => ({
+      ...file,
+      path: path.join(process.cwd(), 'upload', 'files', file.filename)
+    }));
+
+    const textureFilesWithPaths = textureFiles.map(file => ({
+      ...file,
+      path: path.join(process.cwd(), 'upload', 'files', file.filename)
+    }));
+
+    // Create compressed archive with all files
+    const archivePath = await CompressionService.createMultiFileArchive(
+      modelFilesWithPaths,
+      textureFilesWithPaths,
+      name // use product name for archive
+    );
+    
+    // Get relative path for database
+    filePath = `/${path.basename(archivePath)}`;
+    
+    // Mark all individual files for cleanup
+    filesToCleanup = [...modelFilesWithPaths, ...textureFilesWithPaths];
+    
+    console.log('✅ Compressed archive created with all files');
 
     console.log('🔄 Processing categories, formats, and logiciels...');
 
@@ -161,11 +195,28 @@ export const createProduct = async (req, res) =>{
 
     console.log('✅ Product created in database');
 
+    // Clean up individual files after compression
+    if (filesToCleanup.length > 0) {
+      setImmediate(async () => {
+        try {
+          await CompressionService.cleanupMultipleFiles(modelFilesWithPaths, textureFilesWithPaths);
+          console.log('✅ Individual files cleaned up');
+        } catch (error) {
+          console.error('❌ Error cleaning up files:', error);
+        }
+      });
+    }
+
     // Return success immediately
     res.status(201).json({
       ...newProduct,
-      message: 'Product created successfully. FAISS embedding will be generated in the background.',
-      embedding_status: 'pending'
+      message: `Product created successfully with compressed archive containing ${modelFiles.length + textureFiles.length} files. FAISS embedding will be generated in the background.`,
+      embedding_status: 'pending',
+      file_count: {
+        models: modelFiles.length,
+        textures: textureFiles.length,
+        total: modelFiles.length + textureFiles.length
+      }
     });
 
     // Generate FAISS embedding asynchronously (non-blocking)
